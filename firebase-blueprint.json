@@ -1,0 +1,118 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "displayName": { "type": "string", "description": "User's full name" },
+        "email": { "type": "string", "format": "email", "description": "User's email address" },
+        "photoURL": { "type": "string", "description": "Profile picture URL" },
+        "role": { "type": "string", "enum": ["admin", "user"], "description": "User access level" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation timestamp" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Episode": {
+      "title": "Episode",
+      "description": "Video interview episode",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Episode title" },
+        "description": { "type": "string", "description": "Episode description" },
+        "videoUrl": { "type": "string", "description": "YouTube or Vimeo URL" },
+        "thumbnailUrl": { "type": "string", "description": "Thumbnail image URL" },
+        "category": { "type": "string", "description": "Business category" },
+        "businessId": { "type": "string", "description": "Reference to Business entity" },
+        "publishedAt": { "type": "string", "format": "date-time", "description": "Publication date" }
+      },
+      "required": ["title", "videoUrl", "publishedAt"]
+    },
+    "Business": {
+      "title": "Business",
+      "description": "Local business profile",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Business name" },
+        "description": { "type": "string", "description": "Business description" },
+        "category": { "type": "string", "description": "Category (e.g., Gastronomia, Serviços)" },
+        "address": { "type": "string", "description": "Physical address" },
+        "phone": { "type": "string", "description": "Contact phone" },
+        "whatsapp": { "type": "string", "description": "WhatsApp number" },
+        "instagram": { "type": "string", "description": "Instagram handle" },
+        "website": { "type": "string", "description": "Website URL" },
+        "logoUrl": { "type": "string", "description": "Logo image URL" },
+        "coverUrl": { "type": "string", "description": "Cover image URL" },
+        "gallery": { "type": "array", "items": { "type": "string" }, "description": "Gallery image URLs" }
+      },
+      "required": ["name", "category"]
+    },
+    "BlogPost": {
+      "title": "BlogPost",
+      "description": "Blog article",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Article title" },
+        "content": { "type": "string", "description": "Markdown content" },
+        "author": { "type": "string", "description": "Author name" },
+        "thumbnailUrl": { "type": "string", "description": "Featured image URL" },
+        "publishedAt": { "type": "string", "format": "date-time", "description": "Publication date" },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["title", "content", "publishedAt"]
+    },
+    "CommercialRequest": {
+      "title": "CommercialRequest",
+      "description": "Business partnership request",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "businessName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "whatsapp": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "contacted", "closed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "businessName", "email", "whatsapp", "createdAt"]
+    },
+    "Favorite": {
+      "title": "Favorite",
+      "description": "User favorite video",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "videoId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "videoId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "users/{userId}/favorites/{favoriteId}": {
+      "schema": "Favorite",
+      "description": "User favorite videos"
+    },
+    "episodes/{episodeId}": {
+      "schema": "Episode",
+      "description": "Video episodes"
+    },
+    "businesses/{businessId}": {
+      "schema": "Business",
+      "description": "Business profiles"
+    },
+    "blogPosts/{postId}": {
+      "schema": "BlogPost",
+      "description": "Blog articles"
+    },
+    "commercialRequests/{requestId}": {
+      "schema": "CommercialRequest",
+      "description": "Business partnership requests"
+    }
+  }
+}
