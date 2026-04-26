@@ -39,6 +39,16 @@ const BusinessProfile: React.FC = () => {
                 
                 if (v) {
                     setVideo(v);
+                    
+                    // If video already has a linked real business, use it!
+                    if (v.businessId) {
+                        const realB = await DataService.getBusinessById(v.businessId);
+                        if (realB) {
+                            setBusiness(realB);
+                            return;
+                        }
+                    }
+
                     // Create a virtual business from video data
                     setBusiness({
                         id: 'virtual-' + v.id,

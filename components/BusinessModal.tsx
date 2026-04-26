@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Business } from '../types';
 import { DataService } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,19 +14,23 @@ interface BusinessModalProps {
 const BusinessModal: React.FC<BusinessModalProps> = ({ isOpen, onClose, onSave, business }) => {
     const { user } = useAuth();
     const [isSaving, setIsSaving] = useState(false);
-    const [formData, setFormData] = useState<Partial<Business>>(
-        business || {
-            name: '',
-            category: '',
-            description: '',
-            address: '',
-            phone: '',
-            whatsapp: '',
-            instagram: '',
-            coverUrl: '',
-            gallery: []
+    const [formData, setFormData] = useState<Partial<Business>>({});
+
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(business || {
+                name: '',
+                category: '',
+                description: '',
+                address: '',
+                phone: '',
+                whatsapp: '',
+                instagram: '',
+                coverUrl: '',
+                gallery: []
+            });
         }
-    );
+    }, [isOpen, business]);
 
     if (!isOpen) return null;
 
@@ -44,7 +48,12 @@ const BusinessModal: React.FC<BusinessModalProps> = ({ isOpen, onClose, onSave, 
             if (business?.id && !business.id.startsWith('virtual-')) {
                 await DataService.updateBusiness(business.id, data);
             } else {
-                await DataService.createBusiness(data);
+                const newBusinessId = await DataService.createBusiness(data);
+                // If this was a virtual business created from a video, link them
+                if (business?.id?.startsWith('virtual-')) {
+                    const videoId = business.id.replace('virtual-', '');
+                    await DataService.updateVideo(videoId, { businessId: newBusinessId });
+                }
             }
             onSave();
             onClose();
