@@ -38,11 +38,11 @@ const About: React.FC = () => {
                         <div className="flex flex-col md:flex-row justify-center items-center gap-8">
                             <div className="text-center">
                                 <h3 className="font-semibold text-lg text-gray-700">Contato Comercial</h3>
-                                <a href="mailto:comercial@rotalocal.com" className="text-yellow-600 hover:underline">comercial@rotalocal.com</a>
+                                <a href="mailto:comercial@rotalocal.com.br" className="text-yellow-600 hover:underline">comercial@rotalocal.com.br</a>
                             </div>
                              <div className="text-center">
                                 <h3 className="font-semibold text-lg text-gray-700">WhatsApp</h3>
-                                <a href="https://wa.me/5551912345678" target="_blank" rel="noopener noreferrer" className="text-yellow-600 hover:underline">(51) 91234-5678</a>
+                                <a href="https://wa.me/5551992888705" target="_blank" rel="noopener noreferrer" className="text-yellow-600 hover:underline">(51) 99288-8705</a>
                             </div>
                         </div>
                     </div>

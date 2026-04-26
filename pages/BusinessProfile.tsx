@@ -4,8 +4,9 @@ import { useParams, Navigate, Link, useNavigate } from 'react-router-dom';
 import { DataService } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
 import type { Business, Video } from '../types';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2, Settings } from 'lucide-react';
 import EpisodeModal from '../components/EpisodeModal';
+import BusinessModal from '../components/BusinessModal';
 
 const BusinessProfile: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -16,7 +17,8 @@ const BusinessProfile: React.FC = () => {
     const [loading, setLoading] = useState(true);
     
     // CRUD State
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEpisodeModalOpen, setIsEpisodeModalOpen] = useState(false);
+    const [isBusinessModalOpen, setIsBusinessModalOpen] = useState(false);
 
     const loadData = async () => {
         if (!id) return;
@@ -85,12 +87,21 @@ const BusinessProfile: React.FC = () => {
         }
     };
 
-    const handleEditVideo = () => {
-        setIsModalOpen(true);
+    const handleDeleteBusiness = async () => {
+        if (!business || !window.confirm("Tem certeza que deseja excluir este negócio e todas as suas informações?")) return;
+        try {
+            await DataService.deleteBusiness(business.id);
+            navigate('/guia');
+        } catch (error) {
+            console.error("Error deleting business:", error);
+            alert("Erro ao excluir negócio.");
+        }
     };
 
     if (loading) return <div className="p-20 text-center">Carregando...</div>;
     if (!business) return <Navigate to="/episodios" replace />;
+
+    const isOwnerOrAdmin = user?.role === 'admin' || (user && business.ownerId === user.uid);
 
     const getYoutubeId = (url: string) => {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
@@ -111,6 +122,23 @@ const BusinessProfile: React.FC = () => {
                     </span>
                     <h1 className="text-5xl md:text-7xl font-black mb-4 uppercase tracking-tighter">{business.name}</h1>
                     <p className="text-xl text-gray-400 max-w-2xl italic font-light">"{business.description}"</p>
+                    
+                    {isOwnerOrAdmin && (
+                        <div className="mt-8 flex gap-4">
+                            <button 
+                                onClick={() => setIsBusinessModalOpen(true)}
+                                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold transition-all border border-white/20"
+                            >
+                                <Settings className="w-4 h-4" /> Configurações do Negócio
+                            </button>
+                            <button 
+                                onClick={handleDeleteBusiness}
+                                className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-6 py-3 rounded-xl font-bold transition-all border border-red-500/20"
+                            >
+                                <Trash2 className="w-4 h-4" /> Excluir Negócio
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -155,7 +183,7 @@ const BusinessProfile: React.FC = () => {
                                         </button>
 
                                         <button 
-                                            onClick={handleEditVideo}
+                                            onClick={() => setIsEpisodeModalOpen(true)}
                                             className="p-3 rounded-full bg-white/90 text-gray-500 hover:text-yellow-600 backdrop-blur-md shadow-2xl transition-all"
                                             title="Editar Episódio"
                                         >
@@ -210,37 +238,37 @@ const BusinessProfile: React.FC = () => {
                     <aside className="lg:col-span-1">
                          <div className="sticky top-28 space-y-8">
                             {/* Contact Card */}
-                            {(business.whatsapp || business.phone || business.instagram || business.address !== 'Informação não disponível') && (
-                                <div className="bg-gray-50 border border-gray-100 p-8 rounded-[2rem] shadow-sm">
-                                    <h3 className="text-2xl font-black text-gray-900 mb-6 uppercase tracking-tighter">Informações</h3>
-                                    <div className="space-y-6">
+                            {(business.whatsapp || business.phone || business.instagram || (business.address && business.address !== 'Informação não disponível')) && (
+                                <div className="bg-[#f0f0f0] p-8 rounded-[2.5rem] shadow-sm">
+                                    <h3 className="text-3xl font-black text-gray-900 mb-8 uppercase tracking-tighter">Informações</h3>
+                                    <div className="bg-white p-6 rounded-[2rem] shadow-sm space-y-6">
                                         {business.whatsapp && (
                                             <a 
                                                 href={`https://wa.me/${business.whatsapp}`} 
-                                                className="flex items-center justify-center gap-3 w-full bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-green-500/20 uppercase tracking-widest text-sm"
+                                                className="flex items-center justify-center gap-3 w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-green-500/20 uppercase tracking-widest text-sm"
                                             >
                                                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.38 1.25 4.81L2 22l5.44-1.42c1.38.74 2.95 1.18 4.6 1.18h.01c5.46 0 9.91-4.45 9.91-9.91s-4.45-9.91-9.92-9.91z"/></svg>
                                                 WhatsApp Direto
                                             </a>
                                         )}
                                         
-                                        <div className="space-y-4">
-                                            {business.address !== 'Informação não disponível' && (
-                                                <div className="flex gap-4">
-                                                    <div className="w-10 h-10 bg-yellow-100 flex items-center justify-center rounded-full text-yellow-600 shrink-0">📍</div>
-                                                    <p className="text-gray-600 text-sm font-medium">{business.address}</p>
+                                        <div className="space-y-6 pt-2">
+                                            {business.address && business.address !== 'Informação não disponível' && (
+                                                <div className="flex gap-4 items-center">
+                                                    <div className="w-12 h-12 bg-yellow-100 flex items-center justify-center rounded-full text-yellow-600 shrink-0 text-xl shadow-sm">📍</div>
+                                                    <p className="text-gray-600 text-sm font-bold">{business.address}</p>
                                                 </div>
                                             )}
                                             {business.phone && (
-                                                <div className="flex gap-4">
-                                                    <div className="w-10 h-10 bg-yellow-100 flex items-center justify-center rounded-full text-yellow-600 shrink-0">📞</div>
-                                                    <p className="text-gray-600 text-sm font-medium">{business.phone}</p>
+                                                <div className="flex gap-4 items-center">
+                                                    <div className="w-12 h-12 bg-yellow-100 flex items-center justify-center rounded-full text-yellow-600 shrink-0 text-xl shadow-sm">📞</div>
+                                                    <p className="text-gray-600 text-sm font-bold">{business.phone}</p>
                                                 </div>
                                             )}
                                             {business.instagram && (
-                                                <a href={`https://instagram.com/${business.instagram}`} target="_blank" className="flex gap-4 group">
-                                                    <div className="w-10 h-10 bg-pink-100 group-hover:bg-pink-200 flex items-center justify-center rounded-full text-pink-600 shrink-0 transition-colors">📷</div>
-                                                    <p className="text-gray-600 text-sm font-bold self-center">@{business.instagram}</p>
+                                                <a href={`https://instagram.com/${business.instagram}`} target="_blank" className="flex gap-4 items-center group">
+                                                    <div className="w-12 h-12 bg-pink-50 group-hover:bg-pink-100 flex items-center justify-center rounded-full text-pink-600 shrink-0 transition-colors text-xl shadow-sm">📷</div>
+                                                    <p className="text-gray-600 text-sm font-black self-center group-hover:text-pink-600 transition-colors">@{business.instagram}</p>
                                                 </a>
                                             )}
                                         </div>
@@ -253,10 +281,17 @@ const BusinessProfile: React.FC = () => {
             </div>
             
             <EpisodeModal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
+                isOpen={isEpisodeModalOpen} 
+                onClose={() => setIsEpisodeModalOpen(false)} 
                 onSave={loadData} 
                 video={video} 
+            />
+
+            <BusinessModal
+                isOpen={isBusinessModalOpen}
+                onClose={() => setIsBusinessModalOpen(false)}
+                onSave={loadData}
+                business={business}
             />
         </div>
     );

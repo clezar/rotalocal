@@ -39,6 +39,7 @@ const Header: React.FC = () => {
           <div className="hidden md:block">
             <div className="ml-10 flex items-center space-x-8 font-bold uppercase tracking-widest text-[10px]">
               <NavItem to="/">Início</NavItem>
+              <NavItem to="/guia">Guia Local</NavItem>
               <NavItem to="/episodios">Episódios</NavItem>
               <NavItem to="/blog">Blog</NavItem>
               <NavItem to="/comercial">Anuncie</NavItem>
@@ -88,6 +89,7 @@ const Header: React.FC = () => {
         <div className="md:hidden bg-white border-t border-gray-100 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="px-6 pt-6 pb-8 space-y-4 font-black uppercase tracking-widest text-[10px]">
               <NavItem to="/" onClick={closeMenu}>Início</NavItem>
+              <NavItem to="/guia" onClick={closeMenu}>Guia Local</NavItem>
               <NavItem to="/episodios" onClick={closeMenu}>Episódios</NavItem>
               <NavItem to="/blog" onClick={closeMenu}>Blog</NavItem>
               <NavItem to="/comercial" onClick={closeMenu}>Comercial</NavItem>

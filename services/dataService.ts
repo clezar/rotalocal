@@ -21,6 +21,63 @@ export const DataService = {
     }
   },
 
+  async getBusinesses(): Promise<Business[]> {
+    const path = 'businesses';
+    try {
+      const q = query(collection(db, path));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Business));
+    } catch (error) {
+      handleFirestoreError(error, 'list' as any, path);
+      return [];
+    }
+  },
+
+  async getUserBusinesses(userId: string): Promise<Business[]> {
+    const path = 'businesses';
+    try {
+      const { query, where, collection, getDocs } = await import('firebase/firestore');
+      const q = query(collection(db, path), where('ownerId', '==', userId));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Business));
+    } catch (error) {
+      handleFirestoreError(error, 'list' as any, path);
+      return [];
+    }
+  },
+
+  async createBusiness(businessData: Omit<Business, 'id'>): Promise<string> {
+    const path = 'businesses';
+    try {
+      const docRef = await addDoc(collection(db, path), businessData);
+      return docRef.id;
+    } catch (error) {
+      handleFirestoreError(error, 'create' as any, path);
+      throw error;
+    }
+  },
+
+  async updateBusiness(businessId: string, businessData: Partial<Business>): Promise<void> {
+    const path = `businesses/${businessId}`;
+    try {
+      const { id, ...data } = businessData as any;
+      await updateDoc(doc(db, 'businesses', businessId), data);
+    } catch (error) {
+      handleFirestoreError(error, 'update' as any, path);
+      throw error;
+    }
+  },
+
+  async deleteBusiness(businessId: string): Promise<void> {
+    const path = `businesses/${businessId}`;
+    try {
+      await deleteDoc(doc(db, 'businesses', businessId));
+    } catch (error) {
+      handleFirestoreError(error, 'delete' as any, path);
+      throw error;
+    }
+  },
+
   async getBusinessById(id: string): Promise<Business | null> {
     const path = `businesses/${id}`;
     try {
@@ -48,6 +105,32 @@ export const DataService = {
     } catch (error) {
       handleFirestoreError(error, 'get' as any, path);
       return null;
+    }
+  },
+
+  async cleanupDuplicateBusinesses(): Promise<void> {
+    try {
+      const businesses = await this.getBusinesses();
+      const seenNames = new Map<string, string>(); // name -> id of the first one found
+      const duplicatesToDelete: string[] = [];
+
+      businesses.forEach(business => {
+        const normalizedName = business.name.trim().toLowerCase();
+        if (seenNames.has(normalizedName)) {
+          duplicatesToDelete.push(business.id);
+        } else {
+          seenNames.set(normalizedName, business.id);
+        }
+      });
+
+      console.log(`Found ${duplicatesToDelete.length} duplicate businesses to delete`);
+      
+      for (const id of duplicatesToDelete) {
+        await this.deleteBusiness(id);
+      }
+    } catch (error) {
+      console.error("Error cleaning up duplicate businesses:", error);
+      throw error;
     }
   },
 

@@ -18,6 +18,8 @@ import UserProfile from './pages/UserProfile';
 import TermsOfUse from './pages/TermsOfUse';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 
+import LocalGuide from './pages/LocalGuide';
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -28,6 +30,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/episodios" element={<Episodes />} />
+            <Route path="/guia" element={<LocalGuide />} />
             <Route path="/negocio/:id" element={<BusinessProfile />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/comercial" element={<Commercial />} />

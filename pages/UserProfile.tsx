@@ -4,12 +4,13 @@ import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { DataService } from '../services/dataService';
 import VideoCard from '../components/VideoCard';
+import MyBusinesses from '../components/MyBusinesses';
 import type { Video, Favorite, CommercialRequest } from '../types';
 
 const UserProfile: React.FC = () => {
   const { user, isAuthenticated, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'profile' | 'favorites' | 'requests'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'businesses' | 'favorites' | 'requests'>('profile');
   const [favorites, setFavorites] = useState<Video[]>([]);
   const [requests, setRequests] = useState<CommercialRequest[]>([]);
   const [loadingData, setLoadingData] = useState(false);
@@ -124,6 +125,12 @@ const UserProfile: React.FC = () => {
                             👤 Meu Perfil
                         </button>
                         <button 
+                          onClick={() => setActiveTab('businesses')}
+                          className={`w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 transition-colors ${activeTab === 'businesses' ? 'bg-yellow-50 text-yellow-700' : 'text-gray-500 hover:bg-gray-50'}`}
+                        >
+                            {user?.role === 'admin' ? '🏪 Gerenciar Negócios' : '🏪 Meus Negócios'}
+                        </button>
+                        <button 
                           onClick={() => setActiveTab('favorites')}
                           className={`w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 transition-colors ${activeTab === 'favorites' ? 'bg-yellow-50 text-yellow-700' : 'text-gray-500 hover:bg-gray-50'}`}
                         >
@@ -181,6 +188,10 @@ const UserProfile: React.FC = () => {
                         </div>
                       )}
                    </div>
+                 )}
+
+                 {activeTab === 'businesses' && (
+                    <MyBusinesses />
                  )}
 
                  {activeTab === 'favorites' && (

@@ -38,6 +38,7 @@ export interface Business {
   logoUrl?: string;
   coverUrl?: string;
   gallery: string[];
+  ownerId?: string; // Add ownerId
 }
 
 export interface BlogPost {
