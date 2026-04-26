@@ -64,6 +64,32 @@ const MyBusinesses: React.FC = () => {
         }
     };
 
+    const handleDeleteAll = async () => {
+        if (!user) return;
+        const msg = user.role === 'admin' 
+            ? "TEM CERTEZA? Como admin, isso excluirá ABSOLUTAMENTE TODOS os negócios do sistema."
+            : "TEM CERTEZA? Isso excluirá TODOS os seus negócios cadastrados.";
+        
+        if (!confirm(msg + " Esta ação não pode ser desfeita.")) return;
+        
+        setLoading(true);
+        try {
+            let count = 0;
+            if (user.role === 'admin') {
+                count = await DataService.clearAllBusinesses();
+            } else {
+                count = await DataService.deleteAllUserBusinesses(user.uid);
+            }
+            alert(`${count} negócios foram excluídos com sucesso.`);
+            await loadBusinesses();
+        } catch (error) {
+            console.error("Error deleting all businesses:", error);
+            alert("Erro ao excluir todos os negócios.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (loading && businesses.length === 0) return <div className="text-center py-10">Carregando...</div>;
 
     return (
@@ -72,12 +98,22 @@ const MyBusinesses: React.FC = () => {
                 <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">
                     {user?.role === 'admin' ? 'Gerenciar Negócios' : 'Meus Negócios'}
                 </h2>
-                <button 
-                  onClick={() => handleEdit(null)}
-                  className="bg-gray-900 text-white px-4 py-2 rounded-lg font-bold uppercase tracking-widest text-[10px] hover:bg-gray-800 transition-all shadow-lg"
-                >
-                    + Novo Negócio
-                </button>
+                <div className="flex gap-2">
+                    {businesses.length > 0 && (
+                        <button 
+                            onClick={handleDeleteAll}
+                            className="bg-red-50 text-red-600 px-4 py-2 rounded-lg font-bold uppercase tracking-widest text-[10px] hover:bg-red-100 transition-all border border-red-100"
+                        >
+                            Limpar Tudo
+                        </button>
+                    )}
+                    <button 
+                      onClick={() => handleEdit(null)}
+                      className="bg-gray-900 text-white px-4 py-2 rounded-lg font-bold uppercase tracking-widest text-[10px] hover:bg-gray-800 transition-all shadow-lg"
+                    >
+                        + Novo Negócio
+                    </button>
+                </div>
             </div>
 
             {businesses.length > 0 ? (

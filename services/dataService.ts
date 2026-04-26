@@ -78,6 +78,36 @@ export const DataService = {
     }
   },
 
+  async deleteAllUserBusinesses(userId: string): Promise<number> {
+    try {
+      const businesses = await this.getUserBusinesses(userId);
+      let count = 0;
+      for (const b of businesses) {
+        await this.deleteBusiness(b.id);
+        count++;
+      }
+      return count;
+    } catch (error) {
+      console.error("Error deleting all user businesses:", error);
+      throw error;
+    }
+  },
+
+  async clearAllBusinesses(): Promise<number> {
+    try {
+      const businesses = await this.getBusinesses();
+      let count = 0;
+      for (const b of businesses) {
+        await this.deleteBusiness(b.id);
+        count++;
+      }
+      return count;
+    } catch (error) {
+      console.error("Error clearing all businesses:", error);
+      throw error;
+    }
+  },
+
   async getBusinessById(id: string): Promise<Business | null> {
     const path = `businesses/${id}`;
     try {
