@@ -29,9 +29,9 @@ const LocalGuide: React.FC = () => {
         
         setIsCleaning(true);
         try {
-            await DataService.cleanupDuplicateBusinesses();
+            const count = await DataService.cleanupDuplicateBusinesses();
             await loadBusinesses();
-            alert("Limpeza concluída com sucesso!");
+            alert(`Limpeza concluída! ${count} negócios duplicados foram removidos.`);
         } catch (error) {
             console.error(error);
             alert("Erro ao realizar limpeza.");
@@ -48,6 +48,9 @@ const LocalGuide: React.FC = () => {
         const matchesCategory = selectedCategory ? b.category === selectedCategory : true;
         return matchesSearch && matchesCategory;
     });
+
+    // Ensure unique businesses by ID for rendering
+    const uniqueFiltered = Array.from(new Map(filtered.map(b => [b.id, b])).values());
 
     return (
         <div className="bg-gray-50 min-h-screen py-20">
@@ -102,9 +105,9 @@ const LocalGuide: React.FC = () => {
 
                 {loading ? (
                     <div className="text-center py-20 text-xl font-bold text-gray-400">Carregando negócios...</div>
-                ) : filtered.length > 0 ? (
+                ) : uniqueFiltered.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                        {filtered.map(business => (
+                        {uniqueFiltered.map(business => (
                             <Link key={business.id} to={`/negocio/${business.id}`} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-2">
                                 <div className="h-48 overflow-hidden relative">
                                     <img 

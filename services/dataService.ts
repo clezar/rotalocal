@@ -108,26 +108,35 @@ export const DataService = {
     }
   },
 
-  async cleanupDuplicateBusinesses(): Promise<void> {
+  async cleanupDuplicateBusinesses(): Promise<number> {
     try {
       const businesses = await this.getBusinesses();
-      const seenNames = new Map<string, string>(); // name -> id of the first one found
+      const seenNames = new Map<string, string>(); // normalized name -> id of the first one found
       const duplicatesToDelete: string[] = [];
 
       businesses.forEach(business => {
-        const normalizedName = business.name.trim().toLowerCase();
+        // More aggressive normalization (trim, lowercase, remove extra interior spaces)
+        const normalizedName = business.name.trim().toLowerCase().replace(/\s+/g, ' ');
         if (seenNames.has(normalizedName)) {
           duplicatesToDelete.push(business.id);
+          console.log(`Duplicate found: "${business.name}" (ID: ${business.id}), keeping ID: ${seenNames.get(normalizedName)}`);
         } else {
           seenNames.set(normalizedName, business.id);
         }
       });
 
-      console.log(`Found ${duplicatesToDelete.length} duplicate businesses to delete`);
+      console.log(`Found ${duplicatesToDelete.length} duplicates to remove.`);
       
+      let deletedCount = 0;
       for (const id of duplicatesToDelete) {
-        await this.deleteBusiness(id);
+        try {
+            await this.deleteBusiness(id);
+            deletedCount++;
+        } catch (err) {
+            console.error(`Failed to delete business ${id}:`, err);
+        }
       }
+      return deletedCount;
     } catch (error) {
       console.error("Error cleaning up duplicate businesses:", error);
       throw error;

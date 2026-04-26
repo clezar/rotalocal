@@ -29,13 +29,15 @@ const MyBusinesses: React.FC = () => {
     const loadBusinesses = async () => {
         if (!user) return;
         try {
-            let data;
+            let data: Business[];
             if (user.role === 'admin') {
                 data = await DataService.getBusinesses();
             } else {
                 data = await DataService.getUserBusinesses(user.uid);
             }
-            setBusinesses(data);
+            // Ensure unique IDs
+            const uniqueData = Array.from(new Map(data.map(b => [b.id, b])).values());
+            setBusinesses(uniqueData);
         } catch (error) {
             console.error("Error loading businesses:", error);
         } finally {

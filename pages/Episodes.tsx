@@ -26,7 +26,9 @@ const Episodes: React.FC = () => {
         DataService.getVideos(isAdmin),
         user ? DataService.getFavorites(user.uid) : Promise.resolve([])
       ]);
-      setVideos(videoData);
+      // Ensure unique IDs
+      const uniqueVideos = Array.from(new Map(videoData.map(v => [v.id, v])).values());
+      setVideos(uniqueVideos);
       setFavorites(favData);
     } catch (error) {
       console.error("Error loading episodes:", error);

@@ -33,7 +33,10 @@ const EpisodeModal: React.FC<EpisodeModalProps> = ({ isOpen, onClose, onSave, vi
         const { collection, getDocs } = await import('firebase/firestore');
         const { db } = await import('../firebase');
         const snapshot = await getDocs(collection(db, 'businesses'));
-        setBusinesses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Business)));
+        const allBusinesses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Business));
+        // Ensure unique IDs
+        const uniqueBusinesses = Array.from(new Map(allBusinesses.map(b => [b.id, b])).values());
+        setBusinesses(uniqueBusinesses);
       } catch (error) {
         console.error("Error loading businesses:", error);
       }

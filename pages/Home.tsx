@@ -26,8 +26,12 @@ const Home: React.FC = () => {
         DataService.getVideos(isAdmin),
         user ? DataService.getFavorites(user.uid) : Promise.resolve([])
       ]);
-      setFeaturedVideos(featured);
-      setLocalStories(all.slice(0, 6)); // Just a sample for home
+      // Ensure unique IDs
+      const uniqueFeatured = Array.from(new Map(featured.map(v => [v.id, v])).values());
+      const uniqueAll = Array.from(new Map(all.map(v => [v.id, v])).values());
+      
+      setFeaturedVideos(uniqueFeatured);
+      setLocalStories(uniqueAll.slice(0, 6)); // Just a sample for home
       setFavorites(favData);
     } catch (error) {
       console.error("Error loading home data:", error);
