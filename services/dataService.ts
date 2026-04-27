@@ -266,6 +266,24 @@ export const DataService = {
     }
   },
 
+  async forceDeleteBusinessByName(name: string): Promise<number> {
+    try {
+      const q = query(collection(db, 'businesses'));
+      const snap = await getDocs(q);
+      const matches = snap.docs.filter(doc => doc.data().name === name);
+      
+      let count = 0;
+      for (const d of matches) {
+        await deleteDoc(doc(db, 'businesses', d.id));
+        count++;
+      }
+      return count;
+    } catch (error) {
+      console.error("Error force deleting business:", error);
+      throw error;
+    }
+  },
+
   async getVideoByBusinessId(businessId: string): Promise<Video | null> {
     const path = 'episodes';
     try {
