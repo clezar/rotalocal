@@ -13,7 +13,6 @@ const LocalGuide: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [categories, setCategories] = useState<string[]>([]);
     const [isCleaning, setIsCleaning] = useState(false);
-    const [isForceDeleting, setIsForceDeleting] = useState(false);
 
     const loadData = async () => {
         setLoading(true);
@@ -53,23 +52,6 @@ const LocalGuide: React.FC = () => {
         }
     };
 
-    const handleForceDeleteBuggy = async () => {
-        const targetName = "Ariel Barber | Visagista";
-        if (!window.confirm(`Deseja remover FORÇADAMENTE o cadastro "${targetName}"? Isso resolverá o bug relatado.`)) return;
-        
-        setIsForceDeleting(true);
-        try {
-            const count = await DataService.forceDeleteBusinessByName(targetName);
-            await loadData();
-            alert(`Sucesso! ${count} cadastro(s) de "${targetName}" foram removidos.`);
-        } catch (error) {
-            console.error(error);
-            alert("Erro ao remover o cadastro.");
-        } finally {
-            setIsForceDeleting(false);
-        }
-    };
-
     const filtered = businesses.filter(b => {
         const matchesSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                               b.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -92,25 +74,14 @@ const LocalGuide: React.FC = () => {
                     </p>
 
                     {user?.role === 'admin' && (
-                        <div className="mt-6 md:mt-8 flex flex-wrap justify-center gap-4">
-                            <button 
-                                onClick={handleCleanup}
-                                disabled={isCleaning}
-                                className="inline-flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-600 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50"
-                            >
-                                <Trash2 className="w-4 h-4" /> 
-                                {isCleaning ? 'Limpando...' : 'Remover Negócios Repetidos'}
-                            </button>
-
-                            <button 
-                                onClick={handleForceDeleteBuggy}
-                                disabled={isForceDeleting}
-                                className="inline-flex items-center gap-2 bg-orange-100 hover:bg-orange-200 text-orange-600 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50"
-                            >
-                                <Trash2 className="w-4 h-4" /> 
-                                {isForceDeleting ? 'Removendo...' : 'Correção Emergencial: Ariel Barber'}
-                            </button>
-                        </div>
+                        <button 
+                            onClick={handleCleanup}
+                            disabled={isCleaning}
+                            className="mt-6 md:mt-8 inline-flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-600 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50"
+                        >
+                            <Trash2 className="w-4 h-4" /> 
+                            {isCleaning ? 'Limpando...' : 'Remover Negócios Repetidos'}
+                        </button>
                     )}
                 </div>
 
