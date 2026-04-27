@@ -202,6 +202,41 @@ export const DataService = {
     }
   },
 
+  async createBlogPost(postData: Omit<BlogPost, 'id' | 'publishedAt'>): Promise<string> {
+    const path = 'blogPosts';
+    try {
+      const docRef = await addDoc(collection(db, path), {
+        ...postData,
+        publishedAt: new Date().toISOString()
+      });
+      return docRef.id;
+    } catch (error) {
+      handleFirestoreError(error, 'create' as any, path);
+      throw error;
+    }
+  },
+
+  async updateBlogPost(postId: string, postData: Partial<BlogPost>): Promise<void> {
+    const path = `blogPosts/${postId}`;
+    try {
+      const { id, ...data } = postData as any;
+      await updateDoc(doc(db, 'blogPosts', postId), data);
+    } catch (error) {
+      handleFirestoreError(error, 'update' as any, path);
+      throw error;
+    }
+  },
+
+  async deleteBlogPost(postId: string): Promise<void> {
+    const path = `blogPosts/${postId}`;
+    try {
+      await deleteDoc(doc(db, 'blogPosts', postId));
+    } catch (error) {
+      handleFirestoreError(error, 'delete' as any, path);
+      throw error;
+    }
+  },
+
   async getFeaturedVideos(count: number = 3, isAdmin: boolean = false): Promise<Video[]> {
     const path = 'episodes';
     try {
@@ -337,6 +372,62 @@ export const DataService = {
     } catch (error) {
       handleFirestoreError(error, 'delete' as any, path);
       return 0;
+    }
+  },
+
+  async seedBlogPosts(): Promise<void> {
+    const path = 'blogPosts';
+    try {
+      const existing = await this.getBlogPosts();
+      if (existing.length > 0) return;
+
+      const posts = [
+        {
+          title: 'A Origem do Nome: Por que Capão da Canoa?',
+          content: `Você já se perguntou de onde vem o nome da nossa cidade? A história é fascinante e remonta aos tempos em que a região era apenas um ponto de parada para viajantes.
+
+O termo "Capão" refere-se a uma porção de mato isolada no meio do campo. Segundo os relatos históricos, existia um capão de árvores específico que, quando visto de longe ou de certos ângulos por quem navegava ou passava pela trilha, tinha o formato perfeito de uma canoa.
+
+Esse marco visual natural tornou-se uma referência geográfica tão forte que acabou batizando a localidade. Imagine só: o que hoje é uma cidade pulsante, com arranha-céus e avenidas movimentadas, começou como uma simples referência a um desenho formado pela natureza!`,
+          author: 'Equipe Rota Local',
+          thumbnailUrl: 'https://images.unsplash.com/photo-1549463599-24769f69cbd1?auto=format&fit=crop&q=80&w=800',
+          publishedAt: new Date().toISOString(),
+          tags: ['História', 'Origens', 'Curiosidades']
+        },
+        {
+          title: 'De Arroio da Pescaria a Gigante do Litoral',
+          content: `Antes de ser o destino favorito de milhares de gaúchos no verão, Capão da Canoa tinha um nome bem diferente: Arroio da Pescaria.
+
+No início do século XX, a região era frequentada principalmente por pescadores e por famílias de fazendeiros da região de Osório que vinham passar os meses de calor à beira-mar. As casas eram simples, muitas feitas de madeira e palha, e o acesso era extremamente difícil, feito por estradas de areia que muitas vezes exigiam carros de boi.
+
+A emancipação só veio em 1982, desmembrando-se de Osório. Desde então, o crescimento foi vertiginoso, transformando a antiga vila de pescadores em um dos centros urbanos mais importantes do Rio Grande do Sul, sem perder o charme de suas praias.`,
+          author: 'Equipe Rota Local',
+          thumbnailUrl: 'https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?auto=format&fit=crop&q=80&w=800',
+          publishedAt: new Date(Date.now() - 86400000).toISOString(),
+          tags: ['História', 'Evolução', 'Turismo']
+        },
+        {
+          title: '5 Curiosidades que você (provavelmente) não sabia',
+          content: `Capão da Canoa é cheia de segredos e fatos interessantes. Separamos 5 curiosidades para você compartilhar na próxima roda de amigos:
+
+1. **O Primeiro Hotel**: O primeiro hotel oficial da cidade foi o Hotel da Praia, que ajudou a consolidar o turismo na região ainda na primeira metade do século XX.
+2. **Avenida Paraguassú**: A principal avenida da cidade segue o traçado de uma antiga trilha indígena e de tropeiros que percorria todo o litoral.
+3. **Água Doce**: Antigamente, a água potável era obtida em "cacimbas" cavadas na própria areia da praia ou nas dunas, onde a água da chuva ficava filtrada.
+4. **População Flutuante**: A cidade passa de cerca de 50 mil habitantes fixos para mais de 600 mil durante o auge do veraneio, uma das maiores variações do Brasil.
+5. **Farol do Capão**: O farol original era uma estrutura vital para a navegação de cabotagem, evitando que navios encalhassem nos bancos de areia traiçoeiros da nossa costa.`,
+          author: 'Equipe Rota Local',
+          thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=800',
+          publishedAt: new Date(Date.now() - 172800000).toISOString(),
+          tags: ['Curiosidades', 'Lifestyle', 'Fatos']
+        }
+      ];
+
+      for (const p of posts) {
+        await addDoc(collection(db, path), p);
+      }
+      console.log("Blog posts seeded!");
+    } catch (error) {
+      console.error("Error seeding blog posts:", error);
     }
   },
 

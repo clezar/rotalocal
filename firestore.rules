@@ -39,8 +39,16 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() &&
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-          (request.auth.token.email == "cadastro.lucas@gmail.com" && request.auth.token.email_verified == true));
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "cadastro.lucas@gmail.com" && request.auth.token.email_verified == true) ||
+         (request.auth.token.email == "lucasclezaralves@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidBusiness(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+             data.category is string && data.category.size() > 0 &&
+             (!('ownerId' in data) || data.ownerId is string);
     }
 
     function hasOnlyAllowedFields(fields) {
@@ -83,9 +91,12 @@ service cloud.firestore {
     }
 
     match /businesses/{businessId} {
-      allow read: if true; // Publicly readable for discovery
-      allow create: if isAdmin() || (isAuthenticated() && request.resource.data.ownerId == request.auth.uid);
-      allow update: if isAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid && (!('ownerId' in request.resource.data) || request.resource.data.ownerId == resource.data.ownerId));
+      allow read: if true;
+      allow create: if (isAdmin() || (isAuthenticated() && request.resource.data.ownerId == request.auth.uid)) && 
+                      isValidBusiness(request.resource.data);
+      allow update: if (isAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid && 
+                      (!('ownerId' in request.resource.data) || request.resource.data.ownerId == resource.data.ownerId))) &&
+                      isValidBusiness(request.resource.data);
       allow delete: if isAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
     }
 

@@ -2,8 +2,10 @@
 import React, { useState } from 'react';
 import { DataService } from '../services/dataService';
 import { MOCK_PLANS } from '../constants';
+import { useAuth } from '../contexts/AuthContext';
 
 const Commercial: React.FC = () => {
+    const { user } = useAuth();
     const [formData, setFormData] = useState({
         name: '',
         businessName: '',
@@ -45,92 +47,70 @@ const Commercial: React.FC = () => {
             {/* Mídia Kit Section */}
             <section className="py-24 border-b border-gray-100">
                 <div className="container mx-auto px-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                        <div>
-                            <h2 className="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 leading-none">Por que anunciar <br/>conosco?</h2>
-                            <div className="space-y-8">
-                                <div className="flex gap-6">
-                                    <div className="text-4xl font-black text-yellow-500 shrink-0">01</div>
-                                    <div>
-                                        <h4 className="text-xl font-bold mb-2">Público Qualificado</h4>
-                                        <p className="text-gray-500">Nossa audiência é 90% composta por moradores e veranistas frequentes de Capão da Canoa.</p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-6">
-                                    <div className="text-4xl font-black text-yellow-500 shrink-0">02</div>
-                                    <div>
-                                        <h4 className="text-xl font-bold mb-2">Conteúdo de Valor</h4>
-                                        <p className="text-gray-500">Não fazemos apenas anúncios, contamos histórias que criam conexão emocional com o cliente.</p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-6">
-                                    <div className="text-4xl font-black text-yellow-500 shrink-0">03</div>
-                                    <div>
-                                        <h4 className="text-xl font-bold mb-2">Multiplataforma</h4>
-                                        <p className="text-gray-500">Sua marca presente no YouTube, Instagram, Facebook e em nosso Hub exclusivo.</p>
-                                    </div>
-                                </div>
-                            </div>
+                    <div className="max-w-4xl mx-auto">
+                        <div className="text-center mb-16">
+                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 uppercase tracking-tighter mb-6 leading-none">Por que anunciar conosco?</h2>
+                            <p className="text-gray-500 text-lg max-w-2xl mx-auto">
+                                O Rota Local é a ponte definitiva entre seu comércio e a comunidade de Capão da Canoa.
+                            </p>
                         </div>
-                        <div className="bg-gray-50 p-12 rounded-[3rem] relative">
-                            <div className="absolute -top-6 -right-6 bg-yellow-500 p-6 rounded-3xl shadow-xl transform rotate-6">
-                                <p className="text-gray-900 font-black text-center">BAIXAR<br/>MÍDIA KIT</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                            <div className="flex flex-col items-center text-center">
+                                <div className="text-5xl font-black text-yellow-500 mb-4">01</div>
+                                <h4 className="text-xl font-bold mb-3 uppercase tracking-tight">Público Qualificado</h4>
+                                <p className="text-gray-500 leading-relaxed text-sm">Nossa audiência é composta por moradores e veranistas frequentes que buscam o que há de melhor na cidade.</p>
                             </div>
-                            <h3 className="text-2xl font-black mb-6">Números da Plataforma</h3>
-                            <div className="grid grid-cols-2 gap-8">
-                                <div className="bg-white p-6 rounded-2xl shadow-sm">
-                                    <p className="text-3xl font-black text-yellow-500">+120k</p>
-                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Acessos/Ano</p>
-                                </div>
-                                <div className="bg-white p-6 rounded-2xl shadow-sm">
-                                    <p className="text-3xl font-black text-yellow-500">15min</p>
-                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Tempo Médio</p>
-                                </div>
-                                <div className="bg-white p-6 rounded-2xl shadow-sm">
-                                    <p className="text-3xl font-black text-yellow-500">+45k</p>
-                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Seguidores</p>
-                                </div>
-                                <div className="bg-white p-6 rounded-2xl shadow-sm">
-                                    <p className="text-3xl font-black text-yellow-500">30%</p>
-                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Taxa Engaj.</p>
-                                </div>
+                            
+                            <div className="flex flex-col items-center text-center">
+                                <div className="text-5xl font-black text-yellow-500 mb-4">02</div>
+                                <h4 className="text-xl font-bold mb-3 uppercase tracking-tight">Conteúdo de Valor</h4>
+                                <p className="text-gray-500 leading-relaxed text-sm">Não fazemos apenas anúncios, contamos histórias reais que geram autoridade e confiança para sua marca.</p>
+                            </div>
+                            
+                            <div className="flex flex-col items-center text-center">
+                                <div className="text-5xl font-black text-yellow-500 mb-4">03</div>
+                                <h4 className="text-xl font-bold mb-3 uppercase tracking-tight">Multiplataforma</h4>
+                                <p className="text-gray-500 leading-relaxed text-sm">Sua empresa terá presença garantida em nosso Hub exclusivo e em nossas redes sociais estratégicas.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Pricing */}
-            <section className="py-24 bg-gray-50">
-                <div className="container mx-auto px-6 text-center mb-16">
-                    <h2 className="text-4xl font-black text-gray-900 uppercase tracking-tighter">Escolha o seu <span className="text-yellow-500">Nível de Exposição</span></h2>
-                </div>
+            {/* Pricing - Hidden for non-admins for now */}
+            {user?.role === 'admin' && (
+                <section className="py-24 bg-gray-50">
+                    <div className="container mx-auto px-6 text-center mb-16">
+                        <h2 className="text-4xl font-black text-gray-900 uppercase tracking-tighter">Escolha o seu <span className="text-yellow-500">Nível de Exposição</span></h2>
+                    </div>
 
-                <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {MOCK_PLANS.map(plan => (
-                        <div key={plan.name} className={`relative flex flex-col p-8 rounded-[2.5rem] transition-all duration-300 ${plan.isFeatured ? 'bg-gray-900 text-white scale-105 shadow-2xl z-10' : 'bg-white border border-gray-100 shadow-xl'}`}>
-                            {plan.isFeatured && (
-                                <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-gray-900 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Recomendado</span>
-                            )}
-                            <h3 className={`text-2xl font-black uppercase tracking-tighter mb-4 ${plan.isFeatured ? 'text-yellow-500' : 'text-gray-900'}`}>{plan.name}</h3>
-                            <div className="mb-8">
-                                <span className="text-4xl font-black">{plan.price}</span>
-                                <span className="text-sm opacity-50 ml-2">/único</span>
+                    <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {MOCK_PLANS.map(plan => (
+                            <div key={plan.name} className={`relative flex flex-col p-8 rounded-[2.5rem] transition-all duration-300 ${plan.isFeatured ? 'bg-gray-900 text-white scale-105 shadow-2xl z-10' : 'bg-white border border-gray-100 shadow-xl'}`}>
+                                {plan.isFeatured && (
+                                    <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-gray-900 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Recomendado</span>
+                                )}
+                                <h3 className={`text-2xl font-black uppercase tracking-tighter mb-4 ${plan.isFeatured ? 'text-yellow-500' : 'text-gray-900'}`}>{plan.name}</h3>
+                                <div className="mb-8">
+                                    <span className="text-4xl font-black">{plan.price}</span>
+                                    <span className="text-sm opacity-50 ml-2">/único</span>
+                                </div>
+                                <ul className="space-y-4 mb-10 flex-grow">
+                                    {plan.features.map((f, i) => (
+                                        <li key={i} className="flex gap-3 text-sm font-medium">
+                                            <span className="text-yellow-500">✔</span> {f}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <button className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all ${plan.isFeatured ? 'bg-yellow-500 text-gray-900 hover:bg-yellow-400' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}>
+                                    {plan.ctaText}
+                                </button>
                             </div>
-                            <ul className="space-y-4 mb-10 flex-grow">
-                                {plan.features.map((f, i) => (
-                                    <li key={i} className="flex gap-3 text-sm font-medium">
-                                        <span className="text-yellow-500">✔</span> {f}
-                                    </li>
-                                ))}
-                            </ul>
-                            <button className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all ${plan.isFeatured ? 'bg-yellow-500 text-gray-900 hover:bg-yellow-400' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}>
-                                {plan.ctaText}
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            </section>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             {/* Contact Form */}
             <section id="contato" className="py-24">

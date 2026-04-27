@@ -37,12 +37,24 @@ const About: React.FC = () => {
                         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Entre em Contato</h2>
                         <div className="flex flex-col md:flex-row justify-center items-center gap-8">
                             <div className="text-center">
-                                <h3 className="font-semibold text-lg text-gray-700">Contato Comercial</h3>
-                                <a href="mailto:comercial@rotalocal.com.br" className="text-yellow-600 hover:underline">comercial@rotalocal.com.br</a>
+                                <h3 className="font-semibold text-lg text-gray-700 mb-4">Contato Comercial</h3>
+                                <a 
+                                    href="mailto:comercial@rotalocal.com.br" 
+                                    className="inline-block bg-yellow-500 text-gray-900 px-6 py-3 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-yellow-400 transition-all shadow-lg shadow-yellow-500/20"
+                                >
+                                    Enviar E-mail
+                                </a>
                             </div>
                              <div className="text-center">
-                                <h3 className="font-semibold text-lg text-gray-700">WhatsApp</h3>
-                                <a href="https://wa.me/5551992888705" target="_blank" rel="noopener noreferrer" className="text-yellow-600 hover:underline">(51) 99288-8705</a>
+                                <h3 className="font-semibold text-lg text-gray-700 mb-4">WhatsApp</h3>
+                                <a 
+                                    href="https://wa.me/5551992888705" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="inline-block bg-[#25D366] text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#128C7E] transition-all shadow-lg shadow-green-500/20"
+                                >
+                                    Falar no WhatsApp
+                                </a>
                             </div>
                         </div>
                     </div>

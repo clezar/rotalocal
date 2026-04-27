@@ -105,9 +105,9 @@ const EpisodeModal: React.FC<EpisodeModalProps> = ({ isOpen, onClose, onSave, vi
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
-        <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300 flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+        <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
           <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">
             {video ? 'Editar' : 'Novo'} <span className="text-yellow-500">Episódio</span>
           </h2>
@@ -116,7 +116,7 @@ const EpisodeModal: React.FC<EpisodeModalProps> = ({ isOpen, onClose, onSave, vi
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto flex-1">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-xs font-black uppercase tracking-widest text-gray-400">Título</label>

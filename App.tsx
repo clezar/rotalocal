@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import Episodes from './pages/Episodes';
 import BusinessProfile from './pages/BusinessProfile';
 import Blog from './pages/Blog';
+import BlogPostPage from './pages/BlogPostPage';
 import Commercial from './pages/Commercial';
 import About from './pages/About';
 import Login from './pages/Login';
@@ -33,6 +34,7 @@ const App: React.FC = () => {
             <Route path="/guia" element={<LocalGuide />} />
             <Route path="/negocio/:id" element={<BusinessProfile />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogPostPage />} />
             <Route path="/comercial" element={<Commercial />} />
             <Route path="/sobre" element={<About />} />
             <Route path="/login" element={<Login />} />

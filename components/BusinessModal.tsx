@@ -26,6 +26,7 @@ const BusinessModal: React.FC<BusinessModalProps> = ({ isOpen, onClose, onSave, 
                 phone: '',
                 whatsapp: '',
                 instagram: '',
+                website: '',
                 coverUrl: '',
                 gallery: []
             });
@@ -68,17 +69,17 @@ const BusinessModal: React.FC<BusinessModalProps> = ({ isOpen, onClose, onSave, 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm" onClick={onClose}></div>
-            <div className="relative bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-                <div className="p-10">
-                    <div className="flex justify-between items-center mb-8">
-                        <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tighter">
-                            {business?.id && !business.id.startsWith('virtual-') ? 'Editar Negócio' : 'Cadastrar Negócio'}
-                        </h2>
-                        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                            <X className="w-6 h-6 text-gray-400" />
-                        </button>
-                    </div>
+            <div className="relative bg-white w-full max-w-2xl max-h-[90vh] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+                <div className="p-10 flex justify-between items-center bg-white z-10 border-b border-gray-50 shrink-0">
+                    <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tighter">
+                        {business?.id && !business.id.startsWith('virtual-') ? 'Editar Negócio' : 'Cadastrar Negócio'}
+                    </h2>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                        <X className="w-6 h-6 text-gray-400" />
+                    </button>
+                </div>
 
+                <div className="p-10 overflow-y-auto flex-1">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
@@ -121,6 +122,16 @@ const BusinessModal: React.FC<BusinessModalProps> = ({ isOpen, onClose, onSave, 
                                 />
                             </div>
                             <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Telefone</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Ex: (51) 3625-0000"
+                                    value={formData.phone || ''} 
+                                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                    className="w-full px-6 py-4 bg-gray-50 border border-transparent rounded-2xl focus:ring-4 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all font-medium"
+                                />
+                            </div>
+                            <div className="space-y-2">
                                 <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">WhatsApp</label>
                                 <input 
                                     type="text" 
@@ -137,6 +148,16 @@ const BusinessModal: React.FC<BusinessModalProps> = ({ isOpen, onClose, onSave, 
                                     placeholder="Ex: rotalocal"
                                     value={formData.instagram || ''} 
                                     onChange={e => setFormData({ ...formData, instagram: e.target.value })}
+                                    className="w-full px-6 py-4 bg-gray-50 border border-transparent rounded-2xl focus:ring-4 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all font-medium"
+                                />
+                            </div>
+                            <div className="md:col-span-2 space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Site / Link Externo</label>
+                                <input 
+                                    type="url" 
+                                    placeholder="Ex: https://meusite.com.br"
+                                    value={formData.website || ''} 
+                                    onChange={e => setFormData({ ...formData, website: e.target.value })}
                                     className="w-full px-6 py-4 bg-gray-50 border border-transparent rounded-2xl focus:ring-4 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all font-medium"
                                 />
                             </div>
