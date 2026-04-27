@@ -3,6 +3,7 @@ import type { Business, Category } from '../types';
 import { DataService } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
 import { X, Plus } from 'lucide-react';
+import { maskPhone } from '../lib/masks';
 
 interface BusinessModalProps {
     isOpen: boolean;
@@ -244,7 +245,7 @@ const BusinessModal: React.FC<BusinessModalProps> = ({ isOpen, onClose, onSave, 
                                     type="text" 
                                     placeholder="Ex: (51) 3625-0000"
                                     value={formData.phone || ''} 
-                                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                    onChange={e => setFormData({ ...formData, phone: maskPhone(e.target.value) })}
                                     className="w-full px-6 py-4 bg-gray-50 border border-transparent rounded-2xl focus:ring-4 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all font-medium"
                                 />
                             </div>
@@ -252,9 +253,9 @@ const BusinessModal: React.FC<BusinessModalProps> = ({ isOpen, onClose, onSave, 
                                 <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">WhatsApp</label>
                                 <input 
                                     type="text" 
-                                    placeholder="Ex: 5551988887777"
+                                    placeholder="Ex: (51) 98888-7777"
                                     value={formData.whatsapp || ''} 
-                                    onChange={e => setFormData({ ...formData, whatsapp: e.target.value })}
+                                    onChange={e => setFormData({ ...formData, whatsapp: maskPhone(e.target.value) })}
                                     className="w-full px-6 py-4 bg-gray-50 border border-transparent rounded-2xl focus:ring-4 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all font-medium"
                                 />
                             </div>

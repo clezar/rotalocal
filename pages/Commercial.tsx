@@ -1,18 +1,30 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataService } from '../services/dataService';
 import { MOCK_PLANS } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
+import { maskPhone } from '../lib/masks';
 
 const Commercial: React.FC = () => {
     const { user } = useAuth();
     const [formData, setFormData] = useState({
-        name: '',
+        name: user?.displayName || '',
         businessName: '',
-        email: '',
+        email: user?.email || '',
         whatsapp: '',
         message: ''
     });
+
+    useEffect(() => {
+        if (user) {
+            setFormData(prev => ({
+                ...prev,
+                name: user.displayName || prev.name,
+                email: user.email || prev.email
+            }));
+        }
+    }, [user]);
+
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
@@ -20,9 +32,18 @@ const Commercial: React.FC = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await DataService.createCommercialRequest(formData);
+            await DataService.createCommercialRequest({
+                ...formData,
+                userId: user?.uid
+            });
             setSuccess(true);
-            setFormData({ name: '', businessName: '', email: '', whatsapp: '', message: '' });
+            setFormData({ 
+                name: user?.displayName || '', 
+                businessName: '', 
+                email: user?.email || '', 
+                whatsapp: '', 
+                message: '' 
+            });
         } catch (error) {
             console.error("Error submitting request:", error);
             alert("Ocorreu um erro ao enviar sua solicitação. Tente novamente.");
@@ -160,7 +181,7 @@ const Commercial: React.FC = () => {
                                         placeholder="WhatsApp" 
                                         required
                                         value={formData.whatsapp}
-                                        onChange={(e) => setFormData({...formData, whatsapp: e.target.value})}
+                                        onChange={(e) => setFormData({...formData, whatsapp: maskPhone(e.target.value)})}
                                         className="bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-yellow-500" 
                                     />
                                 </div>

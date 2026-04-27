@@ -27,8 +27,13 @@ const UserProfile: React.FC = () => {
           const favVideos = allVideos.filter(v => favDocs.some(f => f.videoId === v.id));
           setFavorites(favVideos);
         } else if (activeTab === 'requests') {
-          const userRequests = await DataService.getUserCommercialRequests(user.email);
-          setRequests(userRequests);
+          if (isAdmin) {
+            const allRequests = await DataService.getAllCommercialRequests();
+            setRequests(allRequests);
+          } else {
+            const userRequests = await DataService.getUserCommercialRequests(user.email, user.uid);
+            setRequests(userRequests);
+          }
         }
       } catch (error) {
         console.error("Error loading profile data:", error);
@@ -40,6 +45,16 @@ const UserProfile: React.FC = () => {
       loadData();
     }
   }, [user, activeTab]);
+
+  const handleUpdateStatus = async (requestId: string, newStatus: 'pending' | 'contacted' | 'completed') => {
+    if (user?.role !== 'admin') return;
+    try {
+      await DataService.updateCommercialRequestStatus(requestId, newStatus);
+      setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: newStatus } : r));
+    } catch (error) {
+      console.error("Error updating request status:", error);
+    }
+  };
 
   if (authLoading) return <div className="p-20 text-center">Carregando...</div>;
   if (!isAuthenticated) return <Navigate to="/login" />;
@@ -231,26 +246,61 @@ const UserProfile: React.FC = () => {
 
                  {activeTab === 'requests' && (
                    <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
-                      <h2 className="text-2xl font-black text-gray-900 mb-6 uppercase tracking-tighter">Minhas Solicitações</h2>
+                      <h2 className="text-2xl font-black text-gray-900 mb-6 uppercase tracking-tighter">
+                        {user?.role === 'admin' ? 'Gerenciar Solicitações' : 'Minhas Solicitações'}
+                      </h2>
                       {loadingData ? (
-                        <div className="py-12 text-center text-gray-400">Carregando suas solicitações...</div>
+                        <div className="py-12 text-center text-gray-400">Carregando solicitações...</div>
                       ) : requests.length > 0 ? (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                           {requests.map(req => (
-                            <div key={req.id} className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                              <div>
-                                <h3 className="font-bold text-gray-900">{req.businessName}</h3>
-                                <p className="text-xs text-gray-500">{new Date(req.createdAt).toLocaleDateString('pt-BR')} às {new Date(req.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+                            <div key={req.id} className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex flex-col gap-4">
+                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div>
+                                  <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">{req.businessName}</h3>
+                                  <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">
+                                    {new Date(req.createdAt).toLocaleDateString('pt-BR')} • {req.email}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  {user?.role === 'admin' ? (
+                                    <select 
+                                      value={req.status}
+                                      onChange={(e) => handleUpdateStatus(req.id, e.target.value as any)}
+                                      className="bg-white border border-gray-200 rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-yellow-500"
+                                    >
+                                      <option value="pending">Pendente</option>
+                                      <option value="contacted">Em Contato</option>
+                                      <option value="completed">Concluído</option>
+                                    </select>
+                                  ) : (
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                                      req.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 
+                                      req.status === 'contacted' ? 'bg-blue-100 text-blue-700' : 
+                                      'bg-green-100 text-green-700'
+                                    }`}>
+                                      {req.status === 'pending' ? 'Pendente' : req.status === 'contacted' ? 'Em Contato' : 'Concluído'}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                              <div className="flex items-center gap-3">
-                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                                  req.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 
-                                  req.status === 'contacted' ? 'bg-blue-100 text-blue-700' : 
-                                  'bg-green-100 text-green-700'
-                                }`}>
-                                  {req.status === 'pending' ? 'Pendente' : req.status === 'contacted' ? 'Em Contato' : 'Concluído'}
-                                </span>
-                              </div>
+                              
+                              {user?.role === 'admin' && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200/50">
+                                  <div className="text-sm">
+                                    <span className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Responsável</span>
+                                    <p className="font-bold">{req.name}</p>
+                                  </div>
+                                  <div className="text-sm">
+                                    <span className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">WhatsApp</span>
+                                    <a href={`https://wa.me/55${req.whatsapp.replace(/\D/g, '')}`} target="_blank" className="font-bold text-green-600 hover:underline">{req.whatsapp}</a>
+                                  </div>
+                                  <div className="sm:col-span-2 text-sm">
+                                    <span className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Mensagem</span>
+                                    <p className="text-gray-600 italic">"{req.message}"</p>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>

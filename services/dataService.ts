@@ -549,13 +549,35 @@ A emancipação só veio em 1982, desmembrando-se de Osório. Desde então, o cr
     }
   },
 
-  async getUserCommercialRequests(email: string): Promise<CommercialRequest[]> {
+  async getAllCommercialRequests(): Promise<CommercialRequest[]> {
+    const path = 'commercialRequests';
+    try {
+      const q = query(collection(db, path), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CommercialRequest));
+    } catch (error) {
+      handleFirestoreError(error, 'list' as any, path);
+      return [];
+    }
+  },
+
+  async updateCommercialRequestStatus(requestId: string, status: 'pending' | 'contacted' | 'completed'): Promise<void> {
+    const path = `commercialRequests/${requestId}`;
+    try {
+      await updateDoc(doc(db, 'commercialRequests', requestId), { status });
+    } catch (error) {
+      handleFirestoreError(error, 'update' as any, path);
+      throw error;
+    }
+  },
+
+  async getUserCommercialRequests(email: string, userId?: string): Promise<CommercialRequest[]> {
     const path = 'commercialRequests';
     try {
       const q = query(collection(db, path), orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
       const allRequests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CommercialRequest));
-      return allRequests.filter(req => req.email === email);
+      return allRequests.filter(req => req.userId === userId || req.email === email);
     } catch (error) {
       handleFirestoreError(error, 'list' as any, path);
       return [];

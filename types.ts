@@ -53,12 +53,13 @@ export interface BlogPost {
 
 export interface CommercialRequest {
   id: string;
+  userId?: string;
   name: string;
   businessName: string;
   email: string;
   whatsapp: string;
   message?: string;
-  status: 'pending' | 'contacted' | 'closed';
+  status: 'pending' | 'contacted' | 'completed' | 'closed';
   createdAt: string;
 }
 
