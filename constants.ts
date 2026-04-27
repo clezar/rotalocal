@@ -4,6 +4,21 @@ import type { Video, Business, BlogPost, Plan } from './types';
 // Altere para a URL real do seu domínio na Hostgator (ex: https://rotalocal.com.br/api)
 export const API_BASE_URL = 'https://seu-dominio.com.br/api';
 
+export const DEFAULT_CATEGORIES = [
+  'Alimentação',
+  'Saúde & Bem-Estar',
+  'Beleza & Estética',
+  'Moda & Acessórios',
+  'Tecnologia',
+  'Serviços',
+  'Educação',
+  'Pet Shop',
+  'Automotivo',
+  'Lazer & Entretenimento',
+  'Imóveis',
+  'Outros'
+];
+
 export const MOCK_VIDEOS: Video[] = [
   {
     id: '1',

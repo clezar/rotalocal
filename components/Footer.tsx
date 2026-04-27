@@ -15,7 +15,7 @@ const Footer: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     {/* About Section */}
                     <div className="md:col-span-1">
-                        <h2 className="text-xl font-bold mb-4">Rota<span className="text-yellow-500">Local</span></h2>
+                        <h2 className="text-xl font-bold mb-4">ROTA<span className="text-yellow-500">LOCAL</span></h2>
                         <p className="text-gray-400 text-sm">
                             Conectando você às melhores histórias e negócios de Capão da Canoa.
                         </p>

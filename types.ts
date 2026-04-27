@@ -69,6 +69,11 @@ export interface Favorite {
   createdAt: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+}
+
 export enum OperationType {
   CREATE = 'create',
   UPDATE = 'update',

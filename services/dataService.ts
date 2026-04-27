@@ -1,10 +1,103 @@
 
 import { collection, getDocs, getDoc, doc, query, orderBy, limit, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { handleFirestoreError } from '../contexts/AuthContext';
-import { Video, Business, BlogPost, OperationType, CommercialRequest, Favorite } from '../types';
+import { Video, Business, BlogPost, OperationType, CommercialRequest, Favorite, Category } from '../types';
 
 export const DataService = {
+  // Categories
+  async getCategories(): Promise<Category[]> {
+    const path = 'categories';
+    try {
+      const q = query(collection(db, path), orderBy('name', 'asc'));
+      const snapshot = await getDocs(q);
+      const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+      // Unique by name (case insensitive)
+      const uniqueMap = new Map<string, Category>();
+      all.forEach(c => {
+        const normalized = c.name.toLowerCase().trim();
+        if (!uniqueMap.has(normalized)) {
+          uniqueMap.set(normalized, c);
+        }
+      });
+      return Array.from(uniqueMap.values());
+    } catch (error) {
+      handleFirestoreError(error, OperationType.LIST, path);
+      return [];
+    }
+  },
+
+  async cleanupDuplicateCategories(): Promise<number> {
+    try {
+      const snapshot = await getDocs(collection(db, 'categories'));
+      const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+      
+      const seen = new Map<string, string>(); // name -> id
+      const duplicatesToDelete: string[] = [];
+
+      all.forEach(c => {
+        const normalized = c.name.toLowerCase().trim();
+        if (seen.has(normalized)) {
+          duplicatesToDelete.push(c.id);
+        } else {
+          seen.set(normalized, c.id);
+        }
+      });
+
+      for (const id of duplicatesToDelete) {
+        await deleteDoc(doc(db, 'categories', id));
+      }
+      return duplicatesToDelete.length;
+    } catch (error) {
+      console.error("Error cleaning up categories:", error);
+      return 0;
+    }
+  },
+
+  async createCategory(name: string): Promise<string> {
+    const path = 'categories';
+    const normalizedName = name.trim();
+    try {
+      if (!auth.currentUser) {
+        throw new Error("Usuário não autenticado para criar categoria.");
+      }
+      
+      const existing = await this.getCategories();
+      const duplicate = existing.find(c => c.name.toLowerCase() === normalizedName.toLowerCase());
+      if (duplicate) return duplicate.id;
+
+      const docRef = await addDoc(collection(db, path), { name: normalizedName });
+      return docRef.id;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, path);
+      throw error;
+    }
+  },
+
+  async seedCategories(): Promise<void> {
+    const path = 'categories';
+    try {
+      const existing = await this.getCategories();
+      if (existing.length > 0) return;
+
+      // Only attempt to seed if someone is logged in
+      if (!auth.currentUser) {
+        console.log("Skipping category seeding: user not authenticated.");
+        return;
+      }
+
+      console.log("Seeding categories...");
+      const { DEFAULT_CATEGORIES } = await import('../constants');
+      for (const name of DEFAULT_CATEGORIES) {
+        await addDoc(collection(db, path), { name });
+      }
+      console.log("Categories seeded successfully!");
+    } catch (error) {
+      console.error("Error during category seeding:", error);
+      // We don't throw here to avoid crashing the whole page load
+    }
+  },
+
   // Content
   async getVideos(isAdmin: boolean = false): Promise<Video[]> {
     const path = 'episodes';

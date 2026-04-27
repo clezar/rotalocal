@@ -98,26 +98,26 @@ const Blog: React.FC = () => {
 
         {/* Blog Post Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-            {[1,2,3].map(i => <div key={i} className="bg-gray-100 animate-pulse aspect-[4/3] rounded-[2rem]"></div>)}
+          <div className="space-y-12">
+            {[1,2,3].map(i => <div key={i} className="bg-gray-100 animate-pulse h-64 rounded-[2rem]"></div>)}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-              {filteredPosts.map(post => (
+          <div className="space-y-24">
+              {filteredPosts.map((post, index) => (
                   <div key={post.id} className="group relative">
-                      <Link to={`/blog/${post.id}`} className="block">
-                        <div className="relative aspect-[4/3] rounded-[2rem] overflow-hidden mb-6 shadow-xl border border-gray-100">
+                      <Link to={`/blog/${post.id}`} className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-center`}>
+                        <div className="w-full md:w-1/2 relative aspect-[4/3] rounded-[3rem] overflow-hidden shadow-2xl border border-gray-100 flex-shrink-0">
                             <img src={post.thumbnailUrl} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                            <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                            <div className="absolute top-6 left-6 flex flex-wrap gap-2">
                                 {post.tags?.slice(0, 2).map(tag => (
-                                  <span key={tag} className="bg-yellow-500 text-gray-900 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">
+                                  <span key={tag} className="bg-yellow-500 text-gray-900 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">
                                       {tag}
                                   </span>
                                 ))}
                             </div>
                             
                             {user?.role === 'admin' && (
-                              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
                                   onClick={(e) => handleEdit(e, post)}
                                   className="p-3 bg-white/90 backdrop-blur-sm text-blue-600 rounded-full hover:bg-white shadow-xl transition-all"
@@ -133,14 +133,18 @@ const Blog: React.FC = () => {
                               </div>
                             )}
                         </div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-                          {new Date(post.publishedAt).toLocaleDateString('pt-BR')} • {post.author}
-                        </p>
-                        <h2 className="text-2xl font-black text-gray-900 group-hover:text-yellow-600 transition-colors mb-3 leading-tight">{post.title}</h2>
-                        <p className="text-gray-500 leading-relaxed mb-6 line-clamp-3">{post.content.replace(/[#*`]/g, '').slice(0, 150)}...</p>
-                        <span className="inline-flex items-center font-black text-sm uppercase tracking-widest text-gray-900 border-b-2 border-yellow-500 pb-1 group-hover:text-yellow-600 transition-all">
-                            Ler post completo
-                        </span>
+                        <div className="w-full md:w-1/2 space-y-4">
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                            {new Date(post.publishedAt).toLocaleDateString('pt-BR')} • {post.author}
+                          </p>
+                          <h2 className="text-4xl font-black text-gray-900 group-hover:text-yellow-600 transition-colors leading-tight">{post.title}</h2>
+                          <p className="text-gray-500 text-lg leading-relaxed line-clamp-3">{post.content.replace(/[#*`]/g, '').slice(0, 200)}...</p>
+                          <div className="pt-4">
+                            <span className="inline-flex items-center font-black text-xs uppercase tracking-widest text-gray-900 border-b-2 border-yellow-500 pb-1 group-hover:text-yellow-600 transition-all">
+                                Ler post completo
+                            </span>
+                          </div>
+                        </div>
                       </Link>
                   </div>
               ))}

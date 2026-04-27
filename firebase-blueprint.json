@@ -87,6 +87,15 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "videoId", "createdAt"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Business category",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" }
+      },
+      "required": ["name"]
     }
   },
   "firestore": {
@@ -113,6 +122,10 @@
     "commercialRequests/{requestId}": {
       "schema": "CommercialRequest",
       "description": "Business partnership requests"
+    },
+    "categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Business categories"
     }
   }
 }

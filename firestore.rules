@@ -111,6 +111,17 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    match /categories/{categoryId} {
+      allow list, get: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (
+        (request.auth.token.email == "cadastro.lucas@gmail.com" && request.auth.token.email_verified == true) ||
+        (request.auth.token.email == "lucasclezaralves@gmail.com" && request.auth.token.email_verified == true) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
     match /{path=**} {
       allow read, write: if false;
     }

@@ -14,6 +14,7 @@ const Episodes: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('recent');
+  const [categories, setCategories] = useState<string[]>([]);
   
   // CRUD State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,14 +23,16 @@ const Episodes: React.FC = () => {
   const loadData = async () => {
     try {
       const isAdmin = user?.role === 'admin';
-      const [videoData, favData] = await Promise.all([
+      const [videoData, favData, catData] = await Promise.all([
         DataService.getVideos(isAdmin),
-        user ? DataService.getFavorites(user.uid) : Promise.resolve([])
+        user ? DataService.getFavorites(user.uid) : Promise.resolve([]),
+        DataService.getCategories()
       ]);
       // Ensure unique IDs
       const uniqueVideos = Array.from(new Map(videoData.map(v => [v.id, v])).values());
       setVideos(uniqueVideos);
       setFavorites(favData);
+      setCategories(['all', ...catData.map(c => c.name)]);
     } catch (error) {
       console.error("Error loading episodes:", error);
     } finally {
@@ -108,8 +111,6 @@ const Episodes: React.FC = () => {
       console.error("Error seeding data:", error);
     }
   };
-
-  const categories = useMemo(() => ['all', ...new Set(videos.map(v => v.category))], [videos]);
 
   const filteredAndSortedVideos = useMemo(() => {
     let result = [...videos];

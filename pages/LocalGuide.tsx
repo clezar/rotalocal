@@ -11,27 +11,39 @@ const LocalGuide: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [categories, setCategories] = useState<string[]>([]);
     const [isCleaning, setIsCleaning] = useState(false);
 
-    const loadBusinesses = async () => {
+    const loadData = async () => {
         setLoading(true);
-        const data = await DataService.getBusinesses();
-        setBusinesses(data);
-        setLoading(false);
+        try {
+            await DataService.seedCategories();
+            const [bizData, catData] = await Promise.all([
+                DataService.getBusinesses(),
+                DataService.getCategories()
+            ]);
+            setBusinesses(bizData);
+            setCategories(catData.map(c => c.name));
+        } catch (error) {
+            console.error("Error loading data:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        loadBusinesses();
+        loadData();
     }, []);
 
     const handleCleanup = async () => {
-        if (!window.confirm("Deseja excluir negócios com nomes repetidos? Esta ação é irreversível.")) return;
+        if (!window.confirm("Deseja realizar uma limpeza no banco de dados? Isso removerá negócios e categorias duplicadas.")) return;
         
         setIsCleaning(true);
         try {
-            const count = await DataService.cleanupDuplicateBusinesses();
-            await loadBusinesses();
-            alert(`Limpeza concluída! ${count} negócios duplicados foram removidos.`);
+            const bizCount = await DataService.cleanupDuplicateBusinesses();
+            const catCount = await DataService.cleanupDuplicateCategories();
+            await loadData();
+            alert(`Limpeza concluída! ${bizCount} negócios e ${catCount} categorias duplicadas foram removidos.`);
         } catch (error) {
             console.error(error);
             alert("Erro ao realizar limpeza.");
@@ -39,8 +51,6 @@ const LocalGuide: React.FC = () => {
             setIsCleaning(false);
         }
     };
-
-    const categories = Array.from(new Set(businesses.map(b => b.category))).filter(Boolean);
 
     const filtered = businesses.filter(b => {
         const matchesSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase()) || 

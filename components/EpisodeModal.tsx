@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import type { Video, Business, Category } from '../types';
 import { DataService } from '../services/dataService';
-import type { Video, Business } from '../types';
+import { X, Plus } from 'lucide-react';
 
 interface EpisodeModalProps {
   isOpen: boolean;
@@ -13,6 +13,9 @@ interface EpisodeModalProps {
 
 const EpisodeModal: React.FC<EpisodeModalProps> = ({ isOpen, onClose, onSave, video }) => {
   const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [formData, setFormData] = useState<Omit<Video, 'id'>>({
     title: '',
     description: '',
@@ -26,23 +29,42 @@ const EpisodeModal: React.FC<EpisodeModalProps> = ({ isOpen, onClose, onSave, vi
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const loadBusinesses = async () => {
-      // For now, we'll fetch all businesses to populate the dropdown
-      // In a real app, we might have a dedicated service method
+    const loadInitialData = async () => {
       try {
         const { collection, getDocs } = await import('firebase/firestore');
         const { db } = await import('../firebase');
-        const snapshot = await getDocs(collection(db, 'businesses'));
+        const [snapshot, fetchedCategories] = await Promise.all([
+            getDocs(collection(db, 'businesses')),
+            DataService.getCategories()
+        ]);
         const allBusinesses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Business));
-        // Ensure unique IDs
         const uniqueBusinesses = Array.from(new Map(allBusinesses.map(b => [b.id, b])).values());
         setBusinesses(uniqueBusinesses);
+        setCategories(fetchedCategories);
       } catch (error) {
-        console.error("Error loading businesses:", error);
+        console.error("Error loading episode modal data:", error);
       }
     };
-    loadBusinesses();
-  }, []);
+    if (isOpen) loadInitialData();
+  }, [isOpen]);
+
+  const fetchCategories = async () => {
+    const cats = await DataService.getCategories();
+    setCategories(cats);
+  };
+
+  const handleAddNewCategory = async () => {
+    if (!newCategoryName.trim()) return;
+    try {
+        await DataService.createCategory(newCategoryName.trim());
+        await fetchCategories();
+        setFormData(prev => ({ ...prev, category: newCategoryName.trim() }));
+        setNewCategoryName('');
+        setShowNewCategoryInput(false);
+    } catch (error) {
+        console.error("Error creating category:", error);
+    }
+  };
 
   useEffect(() => {
     if (video) {
@@ -131,14 +153,59 @@ const EpisodeModal: React.FC<EpisodeModalProps> = ({ isOpen, onClose, onSave, vi
             </div>
             <div className="space-y-2">
               <label className="text-xs font-black uppercase tracking-widest text-gray-400">Categoria</label>
-              <input
-                required
-                type="text"
-                value={formData.category}
-                onChange={e => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-yellow-500 outline-none transition-all font-medium"
-                placeholder="Ex: Alimentação"
-              />
+              {!showNewCategoryInput ? (
+                <div className="relative">
+                  <select 
+                    required 
+                    value={formData.category || ''} 
+                    onChange={e => {
+                      if (e.target.value === 'NEW') {
+                        setShowNewCategoryInput(true);
+                      } else {
+                        setFormData({ ...formData, category: e.target.value });
+                      }
+                    }}
+                    className="w-full px-6 py-4 bg-gray-50 border border-transparent rounded-2xl focus:ring-4 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all font-medium appearance-none"
+                  >
+                    <option value="">Selecione uma categoria</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                    ))}
+                    <option value="NEW" className="text-yellow-600 font-bold">+ Criar Nova Categoria</option>
+                  </select>
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                    <Plus className="w-4 h-4" />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input 
+                    autoFocus
+                    type="text" 
+                    placeholder="Nome da categoria"
+                    value={newCategoryName} 
+                    onChange={e => setNewCategoryName(e.target.value)}
+                    className="flex-1 px-6 py-4 bg-gray-50 border border-transparent rounded-2xl focus:ring-4 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all font-medium"
+                  />
+                  <button 
+                    type="button"
+                    onClick={handleAddNewCategory}
+                    className="px-6 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all uppercase text-xs tracking-widest"
+                  >
+                    Add
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setShowNewCategoryInput(false);
+                      setNewCategoryName('');
+                    }}
+                    className="px-4 bg-gray-100 text-gray-500 rounded-2xl font-bold hover:bg-gray-200 transition-all"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
