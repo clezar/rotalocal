@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { DataService } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
 import type { Business } from '../types';
@@ -7,6 +7,7 @@ import { Trash2, MapPin, Phone, MessageCircle, Globe, ExternalLink } from 'lucid
 
 const LocalGuide: React.FC = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [businesses, setBusinesses] = useState<Business[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -74,14 +75,37 @@ const LocalGuide: React.FC = () => {
                     </p>
 
                     {user?.role === 'admin' && (
-                        <button 
-                            onClick={handleCleanup}
-                            disabled={isCleaning}
-                            className="mt-6 md:mt-8 inline-flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-600 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50"
-                        >
-                            <Trash2 className="w-4 h-4" /> 
-                            {isCleaning ? 'Limpando...' : 'Remover Negócios Repetidos'}
-                        </button>
+                        <div className="flex flex-wrap justify-center gap-4 mt-6 md:mt-8">
+                            <button 
+                                onClick={handleCleanup}
+                                disabled={isCleaning}
+                                className="inline-flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-600 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50"
+                            >
+                                <Trash2 className="w-4 h-4" /> 
+                                {isCleaning ? 'Limpando...' : 'Remover Negócios Repetidos'}
+                            </button>
+
+                            <button 
+                                onClick={async () => {
+                                    if (!window.confirm("Executar correção emergencial (Ariel Barber)?")) return;
+                                    setIsCleaning(true);
+                                    try {
+                                        const result = await DataService.emergencyCorrection();
+                                        await loadData();
+                                        alert(result);
+                                    } catch (err) {
+                                        console.error(err);
+                                        alert("Erro na correção.");
+                                    } finally {
+                                        setIsCleaning(false);
+                                    }
+                                }}
+                                disabled={isCleaning}
+                                className="inline-flex items-center gap-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50"
+                            >
+                                ⚡️ Correção Emergencial
+                            </button>
+                        </div>
                     )}
                 </div>
 
@@ -118,50 +142,44 @@ const LocalGuide: React.FC = () => {
                 ) : uniqueFiltered.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                         {uniqueFiltered.map(business => (
-                            <div key={business.id} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-2">
-                                <Link to={`/negocio/${business.id}`} className="block h-48 overflow-hidden relative">
-                                    <img 
-                                        src={business.coverUrl || business.gallery?.[0] || 'https://images.unsplash.com/photo-1556761175-5973dc0f32b7?auto=format&fit=crop&q=80&w=800'} 
-                                        alt={business.name} 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                    />
-                                    <div className="absolute top-4 left-4">
-                                        <span className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-gray-900 shadow-xl border border-gray-100">
+                            <div 
+                                key={business.id} 
+                                onClick={() => navigate(`/negocio/${business.id}`)}
+                                className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-2 cursor-pointer"
+                            >
+                                <div className="p-6 md:p-10 flex-1 flex flex-col">
+                                    <div className="flex justify-between items-start mb-6">
+                                        <span className="bg-yellow-500 text-gray-900 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-yellow-500/20">
                                             {business.category}
                                         </span>
                                     </div>
-                                </Link>
-                                <div className="p-6 md:p-8 flex-1 flex flex-col">
-                                    <Link to={`/negocio/${business.id}`} className="inline-block group/title">
-                                        <h3 className="text-2xl font-black text-gray-900 mb-3 uppercase tracking-tighter leading-tight group-hover/title:text-yellow-600 transition-colors">
-                                            {business.name}
-                                        </h3>
-                                    </Link>
-                                    
-                                    <p className="text-gray-500 font-medium mb-6 line-clamp-2 text-sm leading-relaxed">
-                                        {business.description}
-                                    </p>
 
-                                    <div className="mt-auto space-y-4 pt-4 border-t border-gray-50">
+                                    <h3 className="text-3xl font-black text-gray-900 mb-4 uppercase tracking-tighter leading-tight group-hover:text-yellow-600 transition-colors">
+                                        {business.name}
+                                    </h3>
+
+                                    <div className="mt-auto space-y-5 pt-6 border-t border-gray-50">
                                         {business.address && business.address !== 'Informação não disponível' && (
                                             <a 
                                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address + ', Capão da Canoa, RS')}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex items-start gap-3 text-sm font-medium text-gray-500 hover:text-yellow-600 transition-colors group/link"
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="flex items-start gap-4 text-sm font-semibold text-gray-500 hover:text-yellow-600 transition-colors group/link"
                                             >
-                                                <MapPin className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
+                                                <MapPin className="w-5 h-5 text-yellow-500 mt-0.5 shrink-0" />
                                                 <span className="line-clamp-2">{business.address}</span>
                                             </a>
                                         )}
 
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {business.phone && (
                                                 <a 
                                                     href={`tel:${business.phone.replace(/\D/g, '')}`}
-                                                    className="flex items-center gap-3 text-sm font-medium text-gray-500 hover:text-yellow-600 transition-colors"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="flex items-center gap-4 text-sm font-semibold text-gray-500 hover:text-yellow-600 transition-colors"
                                                 >
-                                                    <Phone className="w-4 h-4 text-yellow-500 shrink-0" />
+                                                    <Phone className="w-5 h-5 text-yellow-500 shrink-0" />
                                                     <span className="truncate">{business.phone}</span>
                                                 </a>
                                             )}
@@ -171,26 +189,31 @@ const LocalGuide: React.FC = () => {
                                                     href={`https://wa.me/55${business.whatsapp.replace(/\D/g, '')}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex items-center gap-3 text-sm font-medium text-gray-500 hover:text-green-500 transition-colors"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="flex items-center gap-4 text-sm font-semibold text-gray-500 hover:text-green-600 transition-colors"
                                                 >
-                                                    <MessageCircle className="w-4 h-4 text-green-500 shrink-0" />
+                                                    <MessageCircle className="w-5 h-5 text-green-500 shrink-0" />
                                                     <span>WhatsApp</span>
                                                 </a>
                                             )}
                                         </div>
 
-                                        {business.website && (
-                                            <a 
-                                                href={business.website.startsWith('http') ? business.website : `https://${business.website}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-3 text-sm font-medium text-gray-500 hover:text-blue-500 transition-colors"
-                                            >
-                                                <Globe className="w-4 h-4 text-blue-500 shrink-0" />
-                                                <span className="truncate">{business.website.replace(/^https?:\/\//, '')}</span>
-                                                <ExternalLink className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            </a>
-                                        )}
+                                        <div className="flex items-center justify-between pt-2">
+                                            {business.website ? (
+                                                <a 
+                                                    href={business.website.startsWith('http') ? business.website : `https://${business.website}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="flex items-center gap-4 text-sm font-semibold text-gray-500 hover:text-blue-500 transition-colors"
+                                                >
+                                                    <Globe className="w-5 h-5 text-blue-500 shrink-0" />
+                                                    <span className="truncate">{business.website.replace(/^https?:\/\//, '')}</span>
+                                                </a>
+                                            ) : (
+                                                <div />
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

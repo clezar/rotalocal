@@ -266,6 +266,31 @@ export const DataService = {
     }
   },
 
+  async emergencyCorrection(): Promise<string> {
+    try {
+      const businesses = await this.getBusinesses();
+      const arielBarberVariants = businesses.filter(b => 
+        b.name.toLowerCase().includes('ariel') && b.name.toLowerCase().includes('barber')
+      );
+
+      if (arielBarberVariants.length <= 1) return "Nenhuma duplicidade crítica encontrada para Ariel Barber.";
+
+      // Keep the first one, delete the rest
+      const [toKeep, ...toDelete] = arielBarberVariants;
+      
+      let count = 0;
+      for (const b of toDelete) {
+        await this.deleteBusiness(b.id);
+        count++;
+      }
+
+      return `Sucesso: ${count} variantes de 'Ariel Barber' foram removidas. Mantendo ID: ${toKeep.id}`;
+    } catch (error) {
+      console.error("Error during emergency correction:", error);
+      return "Erro ao realizar correção: " + (error instanceof Error ? error.message : String(error));
+    }
+  },
+
   async getVideoByBusinessId(businessId: string): Promise<Video | null> {
     const path = 'episodes';
     try {
