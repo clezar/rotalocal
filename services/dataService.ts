@@ -269,22 +269,34 @@ export const DataService = {
   async emergencyCorrection(): Promise<string> {
     try {
       const businesses = await this.getBusinesses();
-      const arielBarberVariants = businesses.filter(b => 
-        b.name.toLowerCase().includes('ariel') && b.name.toLowerCase().includes('barber')
+      const targets = businesses.filter(b => 
+        b.name?.toLowerCase().includes('ariel') && b.name?.toLowerCase().includes('barber')
       );
 
-      if (arielBarberVariants.length <= 1) return "Nenhuma duplicidade crítica encontrada para Ariel Barber.";
+      if (targets.length === 0) return "Nenhum negócio 'Ariel Barber' encontrado para remoção.";
 
-      // Keep the first one, delete the rest
-      const [toKeep, ...toDelete] = arielBarberVariants;
-      
       let count = 0;
-      for (const b of toDelete) {
+      for (const b of targets) {
+        // 1. Delete associated videos
+        const episodes = await this.getVideos(true);
+        const relatedVideos = episodes.filter(v => v.businessId === b.id);
+        for (const v of relatedVideos) {
+          await this.deleteVideo(v.id);
+        }
+
+        // 2. Delete commercial requests for this business
+        const requests = await this.getAllCommercialRequests();
+        const relatedRequests = requests.filter(r => r.businessName.toLowerCase().includes('ariel') && r.businessName.toLowerCase().includes('barber'));
+        for (const r of relatedRequests) {
+          await deleteDoc(doc(db, 'commercialRequests', r.id));
+        }
+
+        // 3. Delete the business itself
         await this.deleteBusiness(b.id);
         count++;
       }
 
-      return `Sucesso: ${count} variantes de 'Ariel Barber' foram removidas. Mantendo ID: ${toKeep.id}`;
+      return `Sucesso: ${count} instâncias de 'Ariel Barber' e todos os dados vinculados (ex: vídeos, solicitações) foram completamente excluídos.`;
     } catch (error) {
       console.error("Error during emergency correction:", error);
       return "Erro ao realizar correção: " + (error instanceof Error ? error.message : String(error));

@@ -54,8 +54,11 @@ const LocalGuide: React.FC = () => {
     };
 
     const filtered = businesses.filter(b => {
-        const matchesSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                              b.description.toLowerCase().includes(searchTerm.toLowerCase());
+        if (!b || !b.name) return false;
+        const name = b.name || '';
+        const description = b.description || '';
+        const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              description.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = selectedCategory ? b.category === selectedCategory : true;
         return matchesSearch && matchesCategory;
     });
