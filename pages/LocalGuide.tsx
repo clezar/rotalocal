@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { DataService } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
 import type { Business } from '../types';
-import { Trash2, MapPin, Phone, MessageCircle, Globe, ExternalLink } from 'lucide-react';
+import { Edit2, Plus, Trash2, MapPin, Phone, MessageCircle, Globe, ExternalLink } from 'lucide-react';
+import BusinessModal from '../components/BusinessModal';
 
 const LocalGuide: React.FC = () => {
     const { user } = useAuth();
@@ -14,6 +15,8 @@ const LocalGuide: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [categories, setCategories] = useState<string[]>([]);
     const [isCleaning, setIsCleaning] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedBusiness, setSelectedBusiness] = useState<Business | null>(null);
 
     const loadData = async () => {
         setLoading(true);
@@ -53,6 +56,11 @@ const LocalGuide: React.FC = () => {
         }
     };
 
+    const handleAddBusiness = () => {
+        setSelectedBusiness(null);
+        setIsModalOpen(true);
+    };
+
     const filtered = businesses.filter(b => {
         if (!b || !b.name) return false;
         const name = b.name || '';
@@ -79,6 +87,13 @@ const LocalGuide: React.FC = () => {
 
                     {user?.role === 'admin' && (
                         <div className="flex flex-wrap justify-center gap-4 mt-6 md:mt-8">
+                            <button 
+                                onClick={handleAddBusiness}
+                                className="inline-flex items-center gap-2 bg-yellow-500 text-gray-900 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-yellow-600 transition-all shadow-xl shadow-yellow-500/20"
+                            >
+                                <Plus className="w-5 h-5" /> Novo Negócio
+                            </button>
+                            
                             <button 
                                 onClick={handleCleanup}
                                 disabled={isCleaning}
@@ -155,6 +170,19 @@ const LocalGuide: React.FC = () => {
                                         <span className="bg-yellow-500 text-gray-900 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-yellow-500/20">
                                             {business.category}
                                         </span>
+                                        {user?.role === 'admin' && (
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedBusiness(business);
+                                                    setIsModalOpen(true);
+                                                }}
+                                                className="p-2 bg-gray-50 hover:bg-yellow-500 text-gray-400 hover:text-white rounded-full transition-all"
+                                                title="Editar Negócio"
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                            </button>
+                                        )}
                                     </div>
 
                                     <h3 className="text-3xl font-black text-gray-900 mb-4 uppercase tracking-tighter leading-tight group-hover:text-yellow-600 transition-colors">
@@ -236,6 +264,13 @@ const LocalGuide: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            <BusinessModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                onSave={loadData} 
+                business={selectedBusiness} 
+            />
         </div>
     );
 };

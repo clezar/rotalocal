@@ -240,8 +240,8 @@ const Home: React.FC = () => {
 
       {/* CTA Final */}
       <section className="bg-yellow-500 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-10 opacity-10">
-            <svg className="w-64 h-64 text-gray-900" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V7h2v5z"/></svg>
+        <div className="absolute -bottom-20 -right-20 opacity-10 pointer-events-none">
+            <img src="/favicon.png" alt="" className="w-[500px] h-[500px] object-contain" />
         </div>
         <div className="container mx-auto px-6 py-24 relative z-10 flex flex-col items-center text-center">
           <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 uppercase tracking-tighter">Sua empresa merece ser vista!</h2>
