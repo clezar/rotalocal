@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import favicon from '../public/favicon.png';
 
 const NavItem: React.FC<{ to: string; children: React.ReactNode; onClick?: () => void }> = ({ to, children, onClick }) => (
   <NavLink
@@ -33,7 +32,7 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between h-20">
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center gap-2 group">
-              <img src={favicon} alt="Rota Local Logo" className="w-8 h-8 object-contain" />
+              <img src="/favicon.png" alt="Rota Local Logo" className="w-8 h-8 object-contain" />
               <span className="text-2xl font-black text-gray-900 uppercase tracking-tighter">
                 Rota<span className="text-yellow-500">Local</span>
               </span>

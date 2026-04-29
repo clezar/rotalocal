@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import favicon from '../public/favicon.png';
 
 const SocialIcon: React.FC<{ href: string; children: React.ReactNode }> = ({ href, children }) => (
     <a href={href} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-yellow-500 transition-colors">
@@ -17,7 +16,7 @@ const Footer: React.FC = () => {
                     {/* About Section */}
                     <div className="md:col-span-1">
                         <Link to="/" className="flex items-center gap-2 mb-4 group inline-flex">
-                            <img src={favicon} alt="Rota Local Logo" className="w-8 h-8 object-contain" />
+                            <img src="/favicon.png" alt="Rota Local Logo" className="w-8 h-8 object-contain" />
                             <span className="text-xl font-black text-white uppercase tracking-tighter">
                                 Rota<span className="text-yellow-500">Local</span>
                             </span>
