@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { DataService } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
 import type { Business } from '../types';
-import { Edit2, Plus, Trash2, MapPin, Phone, MessageCircle, Globe, ExternalLink } from 'lucide-react';
+import { Edit2, Plus, Trash2, MapPin, Phone, MessageCircle, Globe, ExternalLink, Search } from 'lucide-react';
 import BusinessModal from '../components/BusinessModal';
 
 const LocalGuide: React.FC = () => {
@@ -21,7 +21,6 @@ const LocalGuide: React.FC = () => {
     const loadData = async () => {
         setLoading(true);
         try {
-            await DataService.seedCategories();
             const [bizData, catData] = await Promise.all([
                 DataService.getBusinesses(),
                 DataService.getCategories()
@@ -95,12 +94,16 @@ const LocalGuide: React.FC = () => {
                             </button>
                             
                             <button 
-                                onClick={handleCleanup}
-                                disabled={isCleaning}
-                                className="inline-flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-600 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50"
+                                onClick={async () => {
+                                    if (!window.confirm("ATENÇÃO: Isso excluirá absolutamente TODOS os negócios, vídeos, posts e solicitações do banco de dados. Tem certeza?")) return;
+                                    const result = await DataService.clearAllContent();
+                                    alert(result);
+                                    loadData();
+                                }}
+                                className="inline-flex items-center gap-2 bg-red-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-red-700 transition-all shadow-xl shadow-red-500/20"
                             >
-                                <Trash2 className="w-4 h-4" /> 
-                                {isCleaning ? 'Limpando...' : 'Remover Negócios Repetidos'}
+                                <Trash2 className="w-5 h-5" /> 
+                                LIMPAR BANCO DE DADOS
                             </button>
 
                             <button 
@@ -127,32 +130,38 @@ const LocalGuide: React.FC = () => {
                     )}
                 </div>
 
-                <div className="bg-white rounded-3xl md:rounded-[2rem] shadow-xl p-6 md:p-8 max-w-5xl mx-auto mb-10 md:mb-16 border border-gray-100 flex flex-col md:flex-row gap-4 md:gap-6 items-center z-10 relative">
-                    <div className="flex-1 w-full relative">
-                        <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-                            <span className="text-xl">🔍</span>
+                {/* Seção de Busca e Filtros */}
+                <div className="max-w-5xl mx-auto mb-10 md:mb-16">
+                    <div className="bg-gray-100/80 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-gray-200 flex flex-col md:flex-row gap-4 md:gap-6 items-center">
+                        <div className="flex-1 w-full relative">
+                            <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+                                <Search className="w-5 h-5 text-gray-400" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Pesquisar por nome ou bairro..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-14 pr-6 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-yellow-500/10 focus:border-yellow-500 outline-none transition-all font-bold text-gray-800 placeholder:text-gray-400"
+                            />
                         </div>
-                        <input
-                            type="text"
-                            placeholder="O que você está procurando?"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-14 pr-6 py-4 md:py-6 bg-gray-50 border border-transparent rounded-2xl md:rounded-[1.5rem] focus:ring-4 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all font-medium text-base md:text-lg placeholder:text-gray-400"
-                        />
+                        <div className="w-full md:w-72 relative">
+                             <select 
+                                value={selectedCategory} 
+                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                className="w-full px-6 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-yellow-500/10 focus:border-yellow-500 outline-none transition-all font-bold text-gray-700 cursor-pointer appearance-none"
+                                style={{ backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'/%3e%3c/svg%3e")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.5rem center', backgroundSize: '1em' }}
+                            >
+                                <option value="">Todas as Categorias</option>
+                                {categories.map((c, i) => (
+                                    <option key={i} value={c}>{c}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
-                    <div className="w-full md:w-64">
-                         <select 
-                            value={selectedCategory} 
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="w-full px-6 py-4 md:py-6 bg-gray-50 border border-transparent rounded-2xl md:rounded-[1.5rem] focus:ring-4 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all font-medium text-gray-700 cursor-pointer appearance-none"
-                            style={{ backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'/%3e%3c/svg%3e")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.5rem center', backgroundSize: '1em' }}
-                        >
-                            <option value="">Todas as Categorias</option>
-                            {categories.map((c, i) => (
-                                <option key={i} value={c}>{c}</option>
-                            ))}
-                        </select>
-                    </div>
+                    <p className="text-center text-[10px] font-black text-gray-400 uppercase tracking-widest mt-4">
+                        A busca acima serve apenas para filtrar os resultados abaixo.
+                    </p>
                 </div>
 
                 {loading ? (

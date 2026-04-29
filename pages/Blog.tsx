@@ -30,11 +30,7 @@ const Blog: React.FC = () => {
   };
 
   useEffect(() => {
-    const init = async () => {
-      await DataService.seedBlogPosts();
-      loadData();
-    };
-    init();
+    loadData();
   }, []);
 
   const handleDelete = async (e: React.MouseEvent, postId: string) => {

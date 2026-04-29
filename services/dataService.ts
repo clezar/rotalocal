@@ -201,6 +201,53 @@ export const DataService = {
     }
   },
 
+  async clearAllContent(): Promise<string> {
+    try {
+      if (!auth.currentUser) {
+        return "Erro: Usuário não autenticado. Faça login como administrador.";
+      }
+      
+      console.log("Iniciando limpeza total de negócios e episódios...");
+      
+      // 1. Clear Episodes
+      const episodes = await this.getVideos(true);
+      let episodesCount = 0;
+      for (const v of episodes) {
+        await this.deleteVideo(v.id);
+        episodesCount++;
+      }
+      
+      // 2. Clear Businesses
+      const businesses = await this.getBusinesses();
+      let businessesCount = 0;
+      for (const b of businesses) {
+        await this.deleteBusiness(b.id);
+        businessesCount++;
+      }
+
+      // 3. Clear Blog Posts
+      const blogPosts = await this.getBlogPosts();
+      let blogCount = 0;
+      for (const p of blogPosts) {
+        await this.deleteBlogPost(p.id);
+        blogCount++;
+      }
+
+      // 4. Clear Commercial Requests
+      const requests = await this.getAllCommercialRequests();
+      let requestsCount = 0;
+      for (const r of requests) {
+        await deleteDoc(doc(db, 'commercialRequests', r.id));
+        requestsCount++;
+      }
+
+      return `Sucesso: ${businessesCount} negócios, ${episodesCount} episódios, ${blogCount} posts e ${requestsCount} solicitações foram removidos.`;
+    } catch (error) {
+      console.error("Error clearing all content:", error);
+      return "Erro ao limpar banco de dados: " + (error instanceof Error ? error.message : String(error));
+    }
+  },
+
   async getBusinessById(id: string): Promise<Business | null> {
     const path = `businesses/${id}`;
     try {
@@ -270,23 +317,32 @@ export const DataService = {
     try {
       const businesses = await this.getBusinesses();
       const targets = businesses.filter(b => 
-        b.name?.toLowerCase().includes('ariel') && b.name?.toLowerCase().includes('barber')
+        (b.name?.toLowerCase().includes('ariel') && b.name?.toLowerCase().includes('barber')) ||
+        (b.id === 'virtual-PDfr49oBoQDN4EKBoGVT') ||
+        (b.id === 'PDfr49oBoQDN4EKBoGVT')
       );
 
-      if (targets.length === 0) return "Nenhum negócio 'Ariel Barber' encontrado para remoção.";
+      if (targets.length === 0) return "Nenhum negócio 'Ariel Barber' encontrado para remoção no momento.";
 
       let count = 0;
       for (const b of targets) {
         // 1. Delete associated videos
         const episodes = await this.getVideos(true);
-        const relatedVideos = episodes.filter(v => v.businessId === b.id);
+        const relatedVideos = episodes.filter(v => 
+          v.businessId === b.id || 
+          v.id === `virtual-${b.id}` ||
+          (v.title.toLowerCase().includes('ariel') && v.title.toLowerCase().includes('barber'))
+        );
         for (const v of relatedVideos) {
           await this.deleteVideo(v.id);
         }
 
-        // 2. Delete commercial requests for this business
+        // 2. Delete commercial requests
         const requests = await this.getAllCommercialRequests();
-        const relatedRequests = requests.filter(r => r.businessName.toLowerCase().includes('ariel') && r.businessName.toLowerCase().includes('barber'));
+        const relatedRequests = requests.filter(r => 
+          r.businessName.toLowerCase().includes('ariel') && 
+          r.businessName.toLowerCase().includes('barber')
+        );
         for (const r of relatedRequests) {
           await deleteDoc(doc(db, 'commercialRequests', r.id));
         }
@@ -296,7 +352,7 @@ export const DataService = {
         count++;
       }
 
-      return `Sucesso: ${count} instâncias de 'Ariel Barber' e todos os dados vinculados (ex: vídeos, solicitações) foram completamente excluídos.`;
+      return `Sucesso: ${count} instâncias de 'Ariel Barber' e todos os dados vinculados foram completamente excluídos.`;
     } catch (error) {
       console.error("Error during emergency correction:", error);
       return "Erro ao realizar correção: " + (error instanceof Error ? error.message : String(error));
