@@ -86,7 +86,7 @@ service cloud.firestore {
     }
 
     match /episodes/{episodeId} {
-      allow read: if isAdmin() || resource.data.isPrivate == false || !('isPrivate' in resource.data);
+      allow read: if true;
       allow write: if isAdmin();
     }
 

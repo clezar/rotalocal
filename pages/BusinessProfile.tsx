@@ -31,10 +31,12 @@ const BusinessProfile: React.FC = () => {
                 const v = allVideos.find(vid => vid.businessId === b.id);
                 setVideo(v || null);
             } else {
-                // If business not found, check if ID is a video ID or a businessId for a video
-                let v = await DataService.getVideoById(id);
+                // If business not found, check if ID is a video ID (could have virtual- prefix)
+                const cleanId = id.startsWith('virtual-') ? id.replace('virtual-', '') : id;
+                let v = await DataService.getVideoById(cleanId);
+                
                 if (!v) {
-                    v = await DataService.getVideoByBusinessId(id);
+                    v = await DataService.getVideoByBusinessId(cleanId);
                 }
                 
                 if (v) {
