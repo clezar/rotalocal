@@ -159,9 +159,6 @@ const LocalGuide: React.FC = () => {
                             </select>
                         </div>
                     </div>
-                    <p className="text-center text-[10px] font-black text-gray-400 uppercase tracking-widest mt-4">
-                        A busca acima serve apenas para filtrar os resultados abaixo.
-                    </p>
                 </div>
 
                 {loading ? (
@@ -180,17 +177,37 @@ const LocalGuide: React.FC = () => {
                                             {business.category}
                                         </span>
                                         {user?.role === 'admin' && (
-                                            <button 
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSelectedBusiness(business);
-                                                    setIsModalOpen(true);
-                                                }}
-                                                className="p-2 bg-gray-50 hover:bg-yellow-500 text-gray-400 hover:text-white rounded-full transition-all"
-                                                title="Editar Negócio"
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedBusiness(business);
+                                                        setIsModalOpen(true);
+                                                    }}
+                                                    className="p-2 bg-gray-50 hover:bg-yellow-500 text-gray-400 hover:text-white rounded-full transition-all"
+                                                    title="Editar Negócio"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                                <button 
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        if (!window.confirm(`Tem certeza que deseja excluir "${business.name}"?`)) return;
+                                                        try {
+                                                            await DataService.deleteBusiness(business.id);
+                                                            alert("Negócio excluído com sucesso!");
+                                                            loadData();
+                                                        } catch (error) {
+                                                            console.error(error);
+                                                            alert("Erro ao excluir negócio.");
+                                                        }
+                                                    }}
+                                                    className="p-2 bg-gray-50 hover:bg-red-500 text-gray-400 hover:text-white rounded-full transition-all"
+                                                    title="Excluir Negócio"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
 

@@ -93,7 +93,7 @@ const Home: React.FC = () => {
       <section className="relative min-h-[80vh] flex items-center bg-gray-900 text-white overflow-hidden">
          <div className="absolute inset-0 z-0 opacity-40">
             <img 
-                src="/centro.jpeg" 
+                src="https://iili.io/BsKyZPI.jpg" 
                 alt="Capão da Canoa" 
                 className="w-full h-full object-cover"
             />

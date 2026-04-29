@@ -119,7 +119,9 @@ export const DataService = {
     try {
       const q = query(collection(db, path));
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Business));
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Business));
+      console.log("DEBUG: getBusinesses returned:", data.map(b => ({ id: b.id, name: b.name })));
+      return data;
     } catch (error) {
       handleFirestoreError(error, 'list' as any, path);
       return [];
@@ -315,44 +317,53 @@ export const DataService = {
 
   async emergencyCorrection(): Promise<string> {
     try {
+      console.log("Iniciando correção emergencial profunda...");
+      
+      // 1. Identificar Negócios
       const businesses = await this.getBusinesses();
       const targets = businesses.filter(b => 
-        (b.name?.toLowerCase().includes('ariel') && b.name?.toLowerCase().includes('barber')) ||
+        (b.name?.toLowerCase().includes('ariel')) ||
+        (b.name?.toLowerCase().includes('barber')) ||
+        (b.description?.toLowerCase().includes('visagismo')) ||
         (b.id === 'virtual-PDfr49oBoQDN4EKBoGVT') ||
         (b.id === 'PDfr49oBoQDN4EKBoGVT')
       );
 
-      if (targets.length === 0) return "Nenhum negócio 'Ariel Barber' encontrado para remoção no momento.";
-
       let count = 0;
+      
+      // 2. Limpeza profunda em massa (independente de estar vinculado a um negócio específico encontrado)
+      // Limpar todos os episódios que mencionam o alvo
+      const episodes = await this.getVideos(true);
+      const targetEpisodes = episodes.filter(v => 
+        v.title.toLowerCase().includes('ariel') || 
+        v.title.toLowerCase().includes('barber') ||
+        v.description?.toLowerCase().includes('ariel') ||
+        v.id === 'virtual-PDfr49oBoQDN4EKBoGVT' ||
+        v.id === 'PDfr49oBoQDN4EKBoGVT'
+      );
+      
+      for (const v of targetEpisodes) {
+        await this.deleteVideo(v.id);
+      }
+
+      // Limpar todas as solicitações comerciais que mencionam o alvo
+      const requests = await this.getAllCommercialRequests();
+      const targetRequests = requests.filter(r => 
+        r.businessName?.toLowerCase().includes('ariel') || 
+        r.businessName?.toLowerCase().includes('barber') ||
+        r.name?.toLowerCase().includes('ariel')
+      );
+      for (const r of targetRequests) {
+        await deleteDoc(doc(db, 'commercialRequests', r.id));
+      }
+
+      // 3. Deletar os negócios identificados
       for (const b of targets) {
-        // 1. Delete associated videos
-        const episodes = await this.getVideos(true);
-        const relatedVideos = episodes.filter(v => 
-          v.businessId === b.id || 
-          v.id === `virtual-${b.id}` ||
-          (v.title.toLowerCase().includes('ariel') && v.title.toLowerCase().includes('barber'))
-        );
-        for (const v of relatedVideos) {
-          await this.deleteVideo(v.id);
-        }
-
-        // 2. Delete commercial requests
-        const requests = await this.getAllCommercialRequests();
-        const relatedRequests = requests.filter(r => 
-          r.businessName.toLowerCase().includes('ariel') && 
-          r.businessName.toLowerCase().includes('barber')
-        );
-        for (const r of relatedRequests) {
-          await deleteDoc(doc(db, 'commercialRequests', r.id));
-        }
-
-        // 3. Delete the business itself
         await this.deleteBusiness(b.id);
         count++;
       }
 
-      return `Sucesso: ${count} instâncias de 'Ariel Barber' e todos os dados vinculados foram completamente excluídos.`;
+      return `Sucesso: ${count} negócios, ${targetEpisodes.length} episódios e ${targetRequests.length} solicitações relacionadas a 'Ariel Barber' foram removidas permanentemente.`;
     } catch (error) {
       console.error("Error during emergency correction:", error);
       return "Erro ao realizar correção: " + (error instanceof Error ? error.message : String(error));
