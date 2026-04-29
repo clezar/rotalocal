@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import type { Video, Favorite } from '../types';
 import VideoCard from '../components/VideoCard';
 import EpisodeModal from '../components/EpisodeModal';
+import favicon from '../public/favicon.png';
 
 const Home: React.FC = () => {
   const { user } = useAuth();
@@ -93,7 +94,7 @@ const Home: React.FC = () => {
       <section className="relative min-h-[80vh] flex items-center bg-gray-900 text-white overflow-hidden">
          <div className="absolute inset-0 z-0 opacity-40">
             <img 
-                src="https://rotalocal.com.br/image/centro.png?auto=format&fit=crop&q=80&w=2000" 
+                src="/centro.png" 
                 alt="Capão da Canoa" 
                 className="w-full h-full object-cover"
             />
@@ -241,7 +242,7 @@ const Home: React.FC = () => {
       {/* CTA Final */}
       <section className="bg-yellow-500 relative overflow-hidden">
         <div className="absolute -bottom-20 -right-20 opacity-10 pointer-events-none">
-            <img src="/favicon.png" alt="" className="w-[500px] h-[500px] object-contain" />
+            <img src={favicon} alt="" className="w-[500px] h-[500px] object-contain" />
         </div>
         <div className="container mx-auto px-6 py-24 relative z-10 flex flex-col items-center text-center">
           <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 uppercase tracking-tighter">Sua empresa merece ser vista!</h2>
