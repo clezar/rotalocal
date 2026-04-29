@@ -108,6 +108,28 @@ const LocalGuide: React.FC = () => {
 
                             <button 
                                 onClick={async () => {
+                                    if (!window.confirm("Isso apagará tudo e criará os dados de demonstração (restaurar o banco). Continuar?")) return;
+                                    setIsCleaning(true);
+                                    try {
+                                        const result = await DataService.restoreDatabase();
+                                        alert(result);
+                                        loadData();
+                                    } catch (err) {
+                                        console.error(err);
+                                        alert("Erro na restauração.");
+                                    } finally {
+                                        setIsCleaning(false);
+                                    }
+                                }}
+                                disabled={isCleaning}
+                                className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 disabled:opacity-50"
+                            >
+                                <Plus className="w-5 h-5" /> 
+                                RESTAURAR BANCO DE DADOS
+                            </button>
+
+                            <button 
+                                onClick={async () => {
                                     if (!window.confirm("Executar correção emergencial (Ariel Barber)?")) return;
                                     setIsCleaning(true);
                                     try {

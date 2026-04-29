@@ -315,6 +315,20 @@ export const DataService = {
     }
   },
 
+  async restoreDatabase(): Promise<string> {
+    try {
+      console.log("Iniciando restauração do banco de dados...");
+      await this.clearAllContent();
+      await this.seedCategories();
+      await this.seedData();
+      await this.seedBlogPosts();
+      return "Banco de dados restaurado com dados de teste com sucesso!";
+    } catch (error) {
+      console.error("Erro na restauração:", error);
+      return "Erro ao restaurar banco de dados: " + (error instanceof Error ? error.message : String(error));
+    }
+  },
+
   async emergencyCorrection(): Promise<string> {
     try {
       console.log("Iniciando correção emergencial profunda...");
