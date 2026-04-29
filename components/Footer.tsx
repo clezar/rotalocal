@@ -15,7 +15,10 @@ const Footer: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     {/* About Section */}
                     <div className="md:col-span-1">
-                        <h2 className="text-xl font-bold mb-4">ROTA<span className="text-yellow-500">LOCAL</span></h2>
+                        <Link to="/" className="flex items-center gap-2 mb-4 group inline-flex">
+                            <img src="/favicon.png" alt="Rota Local Logo" className="w-8 h-8 object-contain" onError={(e) => e.currentTarget.style.display = 'none'} />
+                            <h2 className="text-xl font-bold">ROTA<span className="text-yellow-500">LOCAL</span></h2>
+                        </Link>
                         <p className="text-gray-400 text-sm">
                             Conectando você às melhores histórias e negócios de Capão da Canoa.
                         </p>
