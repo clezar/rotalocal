@@ -16,8 +16,10 @@ const Footer: React.FC = () => {
                     {/* About Section */}
                     <div className="md:col-span-1">
                         <Link to="/" className="flex items-center gap-2 mb-4 group inline-flex">
-                            <img src="/favicon.png" alt="Rota Local Logo" className="w-8 h-8 object-contain" onError={(e) => e.currentTarget.style.display = 'none'} />
-                            <h2 className="text-xl font-bold">ROTA<span className="text-yellow-500">LOCAL</span></h2>
+                            <img src="/favicon.png?v=1" alt="Rota Local Logo" className="w-8 h-8 object-contain" />
+                            <span className="text-xl font-black text-white uppercase tracking-tighter">
+                                Rota<span className="text-yellow-500">Local</span>
+                            </span>
                         </Link>
                         <p className="text-gray-400 text-sm">
                             Conectando você às melhores histórias e negócios de Capão da Canoa.

@@ -32,7 +32,7 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between h-20">
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center gap-2 group">
-              <img src="/favicon.png" alt="Rota Local Logo" className="w-8 h-8 object-contain" onError={(e) => e.currentTarget.style.display = 'none'} />
+              <img src="/favicon.png?v=1" alt="Rota Local Logo" className="w-8 h-8 object-contain" />
               <span className="text-2xl font-black text-gray-900 uppercase tracking-tighter">
                 Rota<span className="text-yellow-500">Local</span>
               </span>
