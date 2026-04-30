@@ -27,7 +27,7 @@ const App: React.FC = () => {
       <ScrollToTop />
       <div className="bg-gray-50 min-h-screen flex flex-col font-sans selection:bg-yellow-200">
         <Header />
-        <main className="flex-grow relative z-0">
+        <main className="flex-grow relative">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/episodios" element={<Episodes />} />

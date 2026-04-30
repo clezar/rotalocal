@@ -126,7 +126,7 @@ const BusinessProfile: React.FC = () => {
             {/* Business Header / Cover */}
             <div className="bg-gray-900 text-white py-20 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-20">
-                    <img src={business.coverUrl || business.gallery[0]} alt="" className="w-full h-full object-cover blur-sm" />
+                    <img src={video?.thumbnailUrl || business.coverUrl || business.gallery[0]} alt="" className="w-full h-full object-cover blur-sm" />
                 </div>
                 <div className="container mx-auto px-6 relative z-10 flex flex-col items-center text-center">
                     <span className="bg-yellow-500 text-gray-900 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-4">

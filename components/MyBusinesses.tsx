@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { DataService } from '../services/dataService';
-import type { Business } from '../types';
+import type { Business, Video } from '../types';
 import BusinessModal from './BusinessModal';
 
 const INITIAL_BUSINESS: Partial<Business> = {
@@ -19,6 +19,7 @@ const INITIAL_BUSINESS: Partial<Business> = {
 const MyBusinesses: React.FC = () => {
     const { user } = useAuth();
     const [businesses, setBusinesses] = useState<Business[]>([]);
+    const [videos, setVideos] = useState<Video[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingBusiness, setEditingBusiness] = useState<Business | null>(null);
@@ -31,14 +32,19 @@ const MyBusinesses: React.FC = () => {
         if (!user) return;
         setLoading(true);
         try {
-            let data: Business[];
+            let bizData: Business[];
             if (user.role === 'admin') {
-                data = await DataService.getBusinesses();
+                bizData = await DataService.getBusinesses();
             } else {
-                data = await DataService.getUserBusinesses(user.uid);
+                bizData = await DataService.getUserBusinesses(user.uid);
             }
+            
+            // Fetch videos for thumbnails
+            const videoData = await DataService.getVideos(true);
+            setVideos(videoData);
+
             // Ensure unique IDs
-            const uniqueData = Array.from(new Map(data.map(b => [b.id, b])).values());
+            const uniqueData = Array.from(new Map(bizData.map(b => [b.id, b])).values());
             setBusinesses(uniqueData);
         } catch (error) {
             console.error("Error loading businesses:", error);
@@ -122,8 +128,8 @@ const MyBusinesses: React.FC = () => {
                         <div key={b.id} className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div className="flex items-center gap-4">
                                 <div className="w-16 h-16 rounded-xl bg-gray-200 overflow-hidden shrink-0">
-                                    {b.coverUrl ? (
-                                        <img src={b.coverUrl} alt={b.name} className="w-full h-full object-cover" />
+                                    {(videos.find(v => v.businessId === b.id)?.thumbnailUrl || b.coverUrl) ? (
+                                        <img src={videos.find(v => v.businessId === b.id)?.thumbnailUrl || b.coverUrl} alt={b.name} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-2xl">🏪</div>
                                     )}

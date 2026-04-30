@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { DataService } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
-import type { Business } from '../types';
+import type { Business, Video } from '../types';
 import { Edit2, Plus, Trash2, MapPin, Phone, MessageCircle, Globe, ExternalLink, Search } from 'lucide-react';
 import BusinessModal from '../components/BusinessModal';
 
@@ -10,6 +10,7 @@ const LocalGuide: React.FC = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [businesses, setBusinesses] = useState<Business[]>([]);
+    const [videos, setVideos] = useState<Video[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
@@ -20,12 +21,14 @@ const LocalGuide: React.FC = () => {
     const loadData = async () => {
         setLoading(true);
         try {
-            const [bizData, catData] = await Promise.all([
+            const [bizData, catData, videoData] = await Promise.all([
                 DataService.getBusinesses(),
-                DataService.getCategories()
+                DataService.getCategories(),
+                DataService.getVideos(true) // Get all videos to match thumbnails
             ]);
             setBusinesses(bizData);
             setCategories(catData.map(c => c.name));
+            setVideos(videoData);
         } catch (error) {
             console.error("Error loading data:", error);
         } finally {
@@ -62,7 +65,7 @@ const LocalGuide: React.FC = () => {
                     <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 md:mb-6 uppercase tracking-tighter">
                         Guia <span className="text-yellow-500">Local</span>
                     </h1>
-                    <p className="text-lg md:text-xl text-gray-600 font-medium leading-relaxed">
+                    <p className="text-gray-600 mt-4 max-w-xl mx-auto leading-relaxed">
                         Encontre os melhores negócios, serviços e gastronomia em Capão da Canoa.
                     </p>
 
@@ -119,8 +122,16 @@ const LocalGuide: React.FC = () => {
                                 onClick={() => navigate(`/negocio/${business.id}`)}
                                 className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-2 cursor-pointer"
                             >
-                                <div className="p-6 md:p-10 flex-1 flex flex-col">
-                                    <div className="flex justify-between items-start mb-6">
+                                {/* Imagem de Capa */}
+                                <div className="relative aspect-[2.4/1] overflow-hidden">
+                                    <img 
+                                        src={videos.find(v => v.businessId === business.id)?.thumbnailUrl || business.coverUrl || "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80"} 
+                                        alt={business.name}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/20 to-transparent opacity-80" />
+                                    
+                                    <div className="absolute top-6 left-6 right-6 flex justify-between items-start">
                                         <span className="bg-yellow-500 text-gray-900 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-yellow-500/20">
                                             {business.category}
                                         </span>
@@ -132,7 +143,7 @@ const LocalGuide: React.FC = () => {
                                                         setSelectedBusiness(business);
                                                         setIsModalOpen(true);
                                                     }}
-                                                    className="p-2 bg-gray-50 hover:bg-yellow-500 text-gray-400 hover:text-white rounded-full transition-all"
+                                                    className="p-2 bg-white/20 backdrop-blur-md hover:bg-yellow-500 text-white hover:text-gray-900 rounded-full transition-all border border-white/10"
                                                     title="Editar Negócio"
                                                 >
                                                     <Edit2 className="w-4 h-4" />
@@ -150,7 +161,7 @@ const LocalGuide: React.FC = () => {
                                                             alert("Erro ao excluir negócio.");
                                                         }
                                                     }}
-                                                    className="p-2 bg-gray-50 hover:bg-red-500 text-gray-400 hover:text-white rounded-full transition-all"
+                                                    className="p-2 bg-white/20 backdrop-blur-md hover:bg-red-500 text-white rounded-full transition-all border border-white/10"
                                                     title="Excluir Negócio"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -159,18 +170,22 @@ const LocalGuide: React.FC = () => {
                                         )}
                                     </div>
 
-                                    <h3 className="text-3xl font-black text-gray-900 mb-4 uppercase tracking-tighter leading-tight group-hover:text-yellow-600 transition-colors">
-                                        {business.name}
-                                    </h3>
+                                    <div className="absolute bottom-6 left-6 right-6">
+                                        <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter leading-tight group-hover:text-yellow-400 transition-colors drop-shadow-xl">
+                                            {business.name}
+                                        </h3>
+                                    </div>
+                                </div>
 
-                                    <div className="mt-auto space-y-5 pt-6 border-t border-gray-50">
+                                <div className="p-6 md:p-8 flex-1 flex flex-col">
+                                    <div className="space-y-4">
                                         {business.address && business.address !== 'Informação não disponível' && (
                                             <a 
                                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address + ', Capão da Canoa, RS')}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="flex items-start gap-4 text-sm font-semibold text-gray-500 hover:text-yellow-600 transition-colors group/link"
+                                                className="flex items-start gap-4 text-sm font-semibold text-gray-500 hover:text-yellow-600 transition-colors"
                                             >
                                                 <MapPin className="w-5 h-5 text-yellow-500 mt-0.5 shrink-0" />
                                                 <span className="line-clamp-2">{business.address}</span>
