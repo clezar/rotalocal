@@ -14,7 +14,6 @@ const LocalGuide: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [categories, setCategories] = useState<string[]>([]);
-    const [isCleaning, setIsCleaning] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBusiness, setSelectedBusiness] = useState<Business | null>(null);
 
@@ -37,23 +36,6 @@ const LocalGuide: React.FC = () => {
     useEffect(() => {
         loadData();
     }, []);
-
-    const handleCleanup = async () => {
-        if (!window.confirm("Deseja realizar uma limpeza no banco de dados? Isso removerá negócios e categorias duplicadas.")) return;
-        
-        setIsCleaning(true);
-        try {
-            const bizCount = await DataService.cleanupDuplicateBusinesses();
-            const catCount = await DataService.cleanupDuplicateCategories();
-            await loadData();
-            alert(`Limpeza concluída! ${bizCount} negócios e ${catCount} categorias duplicadas foram removidos.`);
-        } catch (error) {
-            console.error(error);
-            alert("Erro ao realizar limpeza.");
-        } finally {
-            setIsCleaning(false);
-        }
-    };
 
     const handleAddBusiness = () => {
         setSelectedBusiness(null);
@@ -91,62 +73,6 @@ const LocalGuide: React.FC = () => {
                                 className="inline-flex items-center gap-2 bg-yellow-500 text-gray-900 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-yellow-600 transition-all shadow-xl shadow-yellow-500/20"
                             >
                                 <Plus className="w-5 h-5" /> Novo Negócio
-                            </button>
-                            
-                            <button 
-                                onClick={async () => {
-                                    if (!window.confirm("ATENÇÃO: Isso excluirá absolutamente TODOS os negócios, vídeos, posts e solicitações do banco de dados. Tem certeza?")) return;
-                                    const result = await DataService.clearAllContent();
-                                    alert(result);
-                                    loadData();
-                                }}
-                                className="inline-flex items-center gap-2 bg-red-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-red-700 transition-all shadow-xl shadow-red-500/20"
-                            >
-                                <Trash2 className="w-5 h-5" /> 
-                                LIMPAR BANCO DE DADOS
-                            </button>
-
-                            <button 
-                                onClick={async () => {
-                                    if (!window.confirm("Isso apagará tudo e criará os dados de demonstração (restaurar o banco). Continuar?")) return;
-                                    setIsCleaning(true);
-                                    try {
-                                        const result = await DataService.restoreDatabase();
-                                        alert(result);
-                                        loadData();
-                                    } catch (err) {
-                                        console.error(err);
-                                        alert("Erro na restauração.");
-                                    } finally {
-                                        setIsCleaning(false);
-                                    }
-                                }}
-                                disabled={isCleaning}
-                                className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 disabled:opacity-50"
-                            >
-                                <Plus className="w-5 h-5" /> 
-                                RESTAURAR BANCO DE DADOS
-                            </button>
-
-                            <button 
-                                onClick={async () => {
-                                    if (!window.confirm("Executar correção emergencial (Ariel Barber)?")) return;
-                                    setIsCleaning(true);
-                                    try {
-                                        const result = await DataService.emergencyCorrection();
-                                        await loadData();
-                                        alert(result);
-                                    } catch (err) {
-                                        console.error(err);
-                                        alert("Erro na correção.");
-                                    } finally {
-                                        setIsCleaning(false);
-                                    }
-                                }}
-                                disabled={isCleaning}
-                                className="inline-flex items-center gap-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50"
-                            >
-                                ⚡️ Correção Emergencial
                             </button>
                         </div>
                     )}
