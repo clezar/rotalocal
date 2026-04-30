@@ -241,7 +241,7 @@ const Home: React.FC = () => {
       {/* CTA Final */}
       <section className="bg-yellow-500 relative overflow-hidden">
         <div className="absolute -bottom-20 -right-20 opacity-10 pointer-events-none">
-            <img src="/favicon.png" alt="" className="w-[500px] h-[500px] object-contain" />
+            <img src="https://iili.io/BsKyitR.png" alt="" className="w-[500px] h-[500px] object-contain" />
         </div>
         <div className="container mx-auto px-6 py-24 relative z-10 flex flex-col items-center text-center">
           <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 uppercase tracking-tighter">Sua empresa merece ser vista!</h2>
